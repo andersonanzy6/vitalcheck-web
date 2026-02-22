@@ -1,0 +1,89 @@
+import React, { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { useAuth } from '../context/AuthContext.jsx'
+import { authAPI } from '../services/apiClient'
+import '../styles/auth.css'
+
+const LoginPage = () => {
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
+  const navigate = useNavigate()
+  const { login } = useAuth()
+
+  const handleSubmit = async (e) => {
+    e.preventDefault()
+    setError('')
+    setLoading(true)
+
+    try {
+      const response = await authAPI.login(email, password)
+      const { token, user } = response.data
+      
+      await login(user, token)
+      
+      if (user.role === 'doctor') {
+        navigate('/doctor/dashboard')
+      } else {
+        navigate('/patient/dashboard')
+      }
+    } catch (err) {
+      setError(err.response?.data?.message || 'Login failed. Please try again.')
+      console.error('Login error:', err)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  return (
+    <div className="auth-container">
+      <div className="auth-card">
+        <h1 className="auth-title">VitalCheck</h1>
+        <p className="auth-subtitle">Health Consultation Platform</p>
+        
+        <form onSubmit={handleSubmit} className="auth-form">
+          <div className="form-group">
+            <label htmlFor="email">Email</label>
+            <input
+              id="email"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="your@email.com"
+              required
+            />
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="password">Password</label>
+            <input
+              id="password"
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="••••••••"
+              required
+            />
+          </div>
+
+          {error && <div className="error-message">{error}</div>}
+
+          <button 
+            type="submit" 
+            disabled={loading}
+            className="auth-button"
+          >
+            {loading ? 'Logging in...' : 'Login'}
+          </button>
+        </form>
+
+        <p className="auth-link">
+          Don't have an account? <a href="/register">Register here</a>
+        </p>
+      </div>
+    </div>
+  )
+}
+
+export default LoginPage
