@@ -8,7 +8,7 @@ export default defineConfig({
     open: true,
     proxy: {
       '/api': {
-        target: 'https://vitalcheck-56uj.onrender.com',
+        target: 'http://localhost:5000',
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/api/, '/api')
       }
