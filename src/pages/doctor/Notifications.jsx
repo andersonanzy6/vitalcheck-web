@@ -1,47 +1,58 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { notificationAPI } from '../../services/apiClient';
 
 export const DoctorNotificationsPage = () => {
-  const [notifications, setNotifications] = useState([
-    {
-      _id: '1',
-      type: 'appointment_booked',
-      title: 'New Appointment',
-      message: 'John Doe has booked an appointment for tomorrow',
-      timestamp: new Date(Date.now() - 1000 * 60 * 5),
-      read: false,
-    },
-    {
-      _id: '2',
-      type: 'appointment_request',
-      title: 'Appointment Confirmation Needed',
-      message: 'Patient needs confirmation for appointment at 2:00 PM',
-      timestamp: new Date(Date.now() - 1000 * 60 * 60 * 2),
-      read: false,
-    },
-    {
-      _id: '3',
-      type: 'message',
-      title: 'New Message',
-      message: 'Patient sent you a message',
-      timestamp: new Date(Date.now() - 1000 * 60 * 60 * 24),
-      read: true,
-    },
-  ]);
+  const [notifications, setNotifications] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  const handleMarkAsRead = (notificationId) => {
-    setNotifications(prev =>
-      prev.map(notif =>
-        notif._id === notificationId ? { ...notif, read: true } : notif
-      )
-    );
+  useEffect(() => {
+    fetchNotifications();
+  }, []);
+
+  const fetchNotifications = async () => {
+    try {
+      setLoading(true);
+      const response = await notificationAPI.getNotifications();
+      setNotifications(response.data);
+      setError(null);
+    } catch (err) {
+      console.error('Error fetching notifications:', err);
+      setError('Failed to load notifications. Please try again later.');
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleDelete = (notificationId) => {
-    setNotifications(prev => prev.filter(notif => notif._id !== notificationId));
+  const handleMarkAsRead = async (notificationId) => {
+    try {
+      await notificationAPI.markAsRead(notificationId);
+      setNotifications(prev =>
+        prev.map(notif =>
+          notif._id === notificationId ? { ...notif, isRead: true } : notif
+        )
+      );
+    } catch (err) {
+      console.error('Error marking notification as read:', err);
+    }
   };
 
-  const handleMarkAllAsRead = () => {
-    setNotifications(prev => prev.map(notif => ({ ...notif, read: true })));
+  const handleDelete = async (notificationId) => {
+    try {
+      await notificationAPI.deleteNotification(notificationId);
+      setNotifications(prev => prev.filter(notif => notif._id !== notificationId));
+    } catch (err) {
+      console.error('Error deleting notification:', err);
+    }
+  };
+
+  const handleMarkAllAsRead = async () => {
+    try {
+      await notificationAPI.markAllAsRead();
+      setNotifications(prev => prev.map(notif => ({ ...notif, isRead: true })));
+    } catch (err) {
+      console.error('Error marking all as read:', err);
+    }
   };
 
   const formatTime = (timestamp) => {
@@ -69,7 +80,28 @@ export const DoctorNotificationsPage = () => {
     return icons[type] || '📬';
   };
 
-  const unreadCount = notifications.filter(notif => !notif.read).length;
+  const unreadCount = notifications.filter(notif => !notif.isRead).length;
+
+  if (loading) {
+    return (
+      <div style={styles.container}>
+        <div style={styles.loadingState}>
+          <p>Loading notifications...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div style={styles.container}>
+        <div style={styles.errorState}>
+          <p>{error}</p>
+          <button style={styles.retryBtn} onClick={fetchNotifications}>Retry</button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div style={styles.container}>
@@ -96,7 +128,7 @@ export const DoctorNotificationsPage = () => {
               key={notification._id}
               style={{
                 ...styles.notificationItem,
-                ...(notification.read ? {} : styles.notificationItemUnread),
+                ...(notification.isRead ? {} : styles.notificationItemUnread),
               }}
             >
               <div style={styles.notificationIcon}>
@@ -106,11 +138,11 @@ export const DoctorNotificationsPage = () => {
               <div style={styles.notificationContent}>
                 <h3 style={styles.notificationTitle}>{notification.title}</h3>
                 <p style={styles.notificationMessage}>{notification.message}</p>
-                <p style={styles.notificationTime}>{formatTime(notification.timestamp)}</p>
+                <p style={styles.notificationTime}>{formatTime(new Date(notification.createdAt))}</p>
               </div>
 
               <div style={styles.notificationActions}>
-                {!notification.read && (
+                {!notification.isRead && (
                   <button
                     style={styles.iconBtn}
                     onClick={(e) => {
@@ -124,7 +156,10 @@ export const DoctorNotificationsPage = () => {
                 )}
                 <button
                   style={styles.deleteBtn}
-                  onClick={() => handleDelete(notification._id)}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleDelete(notification._id);
+                  }}
                   title="Delete"
                 >
                   ✕
@@ -137,7 +172,7 @@ export const DoctorNotificationsPage = () => {
             <p style={styles.emptyStateIcon}>🔔</p>
             <p style={styles.emptyStateText}>No notifications yet</p>
             <p style={styles.emptyStateSubtext}>
-              You'll receive notifications about new appointments and messages
+              You'll receive notifications about your appointments and messages
             </p>
           </div>
         )}
@@ -202,8 +237,7 @@ const styles = {
   },
   notificationItemUnread: {
     background: 'var(--light-gray)',
-    borderColor: 'var(--secondary-color)',
-    borderWidth: '2px',
+    border: '2px solid var(--secondary-color)',
   },
   notificationIcon: {
     fontSize: '24px',
@@ -280,6 +314,25 @@ const styles = {
     fontSize: '13px',
     color: 'var(--text-light)',
     margin: '0',
+  },
+  loadingState: {
+    textAlign: 'center',
+    padding: '60px 20px',
+    color: 'var(--text-light)',
+  },
+  errorState: {
+    textAlign: 'center',
+    padding: '60px 20px',
+    color: 'var(--danger-color)',
+  },
+  retryBtn: {
+    marginTop: '12px',
+    padding: '8px 16px',
+    background: 'var(--primary-color)',
+    color: 'white',
+    border: 'none',
+    borderRadius: '4px',
+    cursor: 'pointer',
   },
 };
 

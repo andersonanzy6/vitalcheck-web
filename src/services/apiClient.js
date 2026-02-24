@@ -56,6 +56,8 @@ export const doctorAPI = {
     apiClient.get('/auth/profile'),
   updateProfile: (data) =>
     apiClient.put('/auth/profile', data),
+  updateDoctorProfileFields: (data) =>
+    apiClient.put('/doctors/profile', data),
   getAppointments: () =>
     apiClient.get('/appointments/my-appointments'),
   getAppointmentDetails: (id) =>
@@ -79,7 +81,7 @@ export const patientAPI = {
   bookAppointment: (data) =>
     apiClient.post('/appointments/create', data),
   cancelAppointment: (id) =>
-    apiClient.delete(`/appointments/${id}`),
+    apiClient.patch(`/appointments/${id}/status`, { status: 'cancelled' }),
   rescheduleAppointment: (id, data) =>
     apiClient.put(`/appointments/${id}/reschedule`, data),
   getDoctors: (filters = {}) =>
@@ -108,6 +110,22 @@ export const chatAPI = {
     apiClient.get(`/chat/conversation/${userId}`),
   sendMessage: (receiverId, text) =>
     apiClient.post('/chat/send', { receiverId, message: text }),
+  markAsRead: (userId) =>
+    apiClient.patch(`/chat/read/${userId}`),
+}
+
+// Notification endpoints
+export const notificationAPI = {
+  getNotifications: () =>
+    apiClient.get('/notifications'),
+  getUnreadCount: () =>
+    apiClient.get('/notifications/unread-count'),
+  markAsRead: (id) =>
+    apiClient.patch(`/notifications/${id}/read`),
+  markAllAsRead: () =>
+    apiClient.patch('/notifications/mark-all-read'),
+  deleteNotification: (id) =>
+    apiClient.delete(`/notifications/${id}`),
 }
 
 export default apiClient
