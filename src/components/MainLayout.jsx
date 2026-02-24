@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext.jsx'
+import { notificationAPI } from '../services/apiClient'
 import '../styles/main-layout.css'
 
 const MainLayout = ({ children }) => {
@@ -9,9 +10,25 @@ const MainLayout = ({ children }) => {
   const location = useLocation()
   const [menuOpen, setMenuOpen] = useState(false)
   const [notificationsOpen, setNotificationsOpen] = useState(false)
+  const [unreadCount, setUnreadCount] = useState(0)
 
   const isPatient = user?.role === 'patient'
   const isMobile = window.innerWidth <= 768
+
+  React.useEffect(() => {
+    fetchUnreadCount()
+    const interval = setInterval(fetchUnreadCount, 30000) // Refresh every 30s
+    return () => clearInterval(interval)
+  }, [])
+
+  const fetchUnreadCount = async () => {
+    try {
+      const res = await notificationAPI.getUnreadCount()
+      setUnreadCount(res.data.count || 0)
+    } catch (err) {
+      console.error('Error fetching unread count:', err)
+    }
+  }
 
   const patientTabs = [
     { label: 'Home', icon: '🏠', path: '/patient/home' },
@@ -48,14 +65,17 @@ const MainLayout = ({ children }) => {
             <h1 className="app-logo">🏥 VitalCheck</h1>
           </div>
           <div className="header-right">
-            <button 
+            <button
               className="icon-btn notification-btn"
-              onClick={() => setNotificationsOpen(!notificationsOpen)}
+              onClick={() => {
+                navigate(isPatient ? '/patient/notifications' : '/doctor/notifications')
+                setMenuOpen(false)
+              }}
             >
               🔔
-              <span className="badge">3</span>
+              {unreadCount > 0 && <span className="badge">{unreadCount}</span>}
             </button>
-            <button 
+            <button
               className="icon-btn menu-btn"
               onClick={() => setMenuOpen(!menuOpen)}
             >
@@ -107,6 +127,9 @@ const MainLayout = ({ children }) => {
                 >
                   <span className="icon">{tab.icon}</span>
                   <span className="label">{tab.label}</span>
+                  {tab.label === 'Notifications' && unreadCount > 0 && (
+                    <span className="sidebar-badge">{unreadCount}</span>
+                  )}
                 </button>
               ))}
             </nav>
