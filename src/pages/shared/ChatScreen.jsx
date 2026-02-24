@@ -54,10 +54,18 @@ export const ChatScreen = () => {
       const messagesData = messagesResponse.data || [];
       setMessages(messagesData);
 
+      // Mark conversation as read
+      try {
+        await chatAPI.markAsRead(doctorId);
+      } catch (err) {
+        console.warn('Could not mark as read:', err);
+      }
+
       // Extract other participant info from first message
       if (messagesData.length > 0) {
         const firstMsg = messagesData[0];
-        const otherUserData = firstMsg.sender._id === user?._id ? firstMsg.receiver : firstMsg.sender;
+        const currentUserId = (user?.id || user?._id)?.toString();
+        const otherUserData = firstMsg.sender._id?.toString() === currentUserId ? firstMsg.receiver : firstMsg.sender;
         setOtherParticipant(otherUserData);
       } else {
         // If no messages, we'll fetch the user details differently
@@ -220,35 +228,53 @@ export const ChatScreen = () => {
               lastMessageDate && lastMessageDate !== currentDate;
             lastMessageDate = currentDate;
 
-            const isOwnMessage = message.sender?._id === user?._id || message.sender === user?._id;
+            const currentUserId = (user?.id || user?._id)?.toString();
+            const senderId = message.sender?._id ? message.sender._id.toString() : message.sender?.toString();
+            const isOwnMessage = senderId === currentUserId;
 
             return (
-              <div key={message._id || index}>
+              <div key={message._id || index} style={{ width: '100%' }}>
                 {showDateDivider && <div style={styles.dateDivider}>{formatDate(message.createdAt)}</div>}
                 <div
                   style={{
                     ...styles.messageRow,
-                    ...(isOwnMessage ? styles.messageRowOwn : {}),
+                    ...(isOwnMessage ? styles.messageRowOwn : styles.messageRowOther),
                   }}
                 >
-                  {!isOwnMessage && (
-                    <div style={styles.avatar}>
-                      {otherParticipant?.name?.charAt(0).toUpperCase()}
-                    </div>
+                  {isOwnMessage ? (
+                    <>
+                      <div
+                        style={{
+                          ...styles.messageBubble,
+                          ...styles.messageBubbleOwn,
+                        }}
+                      >
+                        <p style={styles.messageContent}>
+                          {message.message}
+                        </p>
+                        <span style={styles.messageTime}>
+                          {formatTime(message.createdAt)}
+                        </span>
+                      </div>
+                      <div style={styles.avatar}>
+                        Y
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <div style={styles.avatar}>
+                        {message.sender?.name?.charAt(0).toUpperCase()}
+                      </div>
+                      <div style={styles.messageBubble}>
+                        <p style={styles.messageContent}>
+                          {message.message}
+                        </p>
+                        <span style={styles.messageTime}>
+                          {formatTime(message.createdAt)}
+                        </span>
+                      </div>
+                    </>
                   )}
-                  <div
-                    style={{
-                      ...styles.messageBubble,
-                      ...(isOwnMessage ? styles.messageBubbleOwn : {}),
-                    }}
-                  >
-                    <p style={styles.messageContent}>
-                      {message.message}
-                    </p>
-                    <span style={styles.messageTime}>
-                      {formatTime(message.createdAt)}
-                    </span>
-                  </div>
                 </div>
               </div>
             );
@@ -335,7 +361,10 @@ const styles = {
     display: 'flex',
     gap: '8px',
     alignItems: 'flex-end',
-    animation: 'slideInUp 0.3s ease',
+    marginBottom: '4px',
+  },
+  messageRowOther: {
+    justifyContent: 'flex-start',
   },
   messageRowOwn: {
     justifyContent: 'flex-end',
@@ -355,17 +384,16 @@ const styles = {
   },
   messageBubble: {
     maxWidth: '70%',
-    background: 'white',
     padding: '12px 16px',
-    borderRadius: '16px 16px 16px 0',
-    border: '1px solid var(--border-color)',
-    boxShadow: '0 1px 2px rgba(0, 0, 0, 0.05)',
+    borderRadius: '18px',
+    border: 'none',
+    boxShadow: '0 1px 2px rgba(0, 0, 0, 0.08)',
+    background: '#e5e7eb',
   },
   messageBubbleOwn: {
-    background: 'var(--secondary-color)',
+    background: '#6366f1',
     color: 'white',
-    borderRadius: '16px 16px 0 16px',
-    border: 'none',
+    borderRadius: '18px',
   },
   messageContent: {
     fontSize: '14px',

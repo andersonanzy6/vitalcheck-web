@@ -74,13 +74,17 @@ export const DoctorDetailPage = () => {
       {/* Doctor Header */}
       <div style={styles.doctorHeader}>
         <div style={styles.avatar}>
-          {doctor.name?.charAt(0).toUpperCase()}
+          {doctor.user?.name?.charAt(0).toUpperCase() || '?'}
         </div>
-        <h2 style={styles.name}>Dr. {doctor.name}</h2>
+        <h2 style={styles.name}>Dr. {doctor.user?.name || 'Unknown'}</h2>
         <p style={styles.specialization}>{doctor.specialization}</p>
         <div style={styles.ratingSection}>
-          <span style={styles.stars}>⭐⭐⭐⭐☆</span>
-          <span style={styles.rating}>4.0 (120 reviews)</span>
+          <span style={styles.stars}>
+            {[...Array(5)].map((_, i) => (
+              <span key={i}>{i < Math.round(doctor.rating || 0) ? '⭐' : '☆'}</span>
+            ))}
+          </span>
+          <span style={styles.rating}>{doctor.rating ? `${doctor.rating.toFixed(1)} rating` : 'No ratings yet'}</span>
         </div>
       </div>
 
@@ -91,7 +95,7 @@ export const DoctorDetailPage = () => {
           <div>
             <p style={styles.infoLabel}>Experience</p>
             <p style={styles.infoValue}>
-              {doctor.yearsOfExperience || doctor.experience || 'Experienced'}
+              {doctor.experience ? `${doctor.experience} yrs` : 'Experienced'}
             </p>
           </div>
         </div>
@@ -100,7 +104,7 @@ export const DoctorDetailPage = () => {
           <span style={styles.infoIcon}>💰</span>
           <div>
             <p style={styles.infoLabel}>Consultation Fee</p>
-            <p style={styles.infoValue}>{doctor.consultationFee || '$50'}</p>
+            <p style={styles.infoValue}>{doctor.consultationFee ? `$${doctor.consultationFee}` : 'Contact for fee'}</p>
           </div>
         </div>
 
@@ -108,9 +112,7 @@ export const DoctorDetailPage = () => {
           <span style={styles.infoIcon}>📍</span>
           <div>
             <p style={styles.infoLabel}>Location</p>
-            <p style={styles.infoValue}>
-              {doctor.clinicAddress || 'Virtual Consultation'}
-            </p>
+            <p style={styles.infoValue}>{doctor.clinicAddress || 'Virtual / Online'}</p>
           </div>
         </div>
 
@@ -118,7 +120,7 @@ export const DoctorDetailPage = () => {
           <span style={styles.infoIcon}>📱</span>
           <div>
             <p style={styles.infoLabel}>Contact</p>
-            <p style={styles.infoValue}>{doctor.phone || 'Available via app'}</p>
+            <p style={styles.infoValue}>{doctor.phone || doctor.user?.email || 'Available via app'}</p>
           </div>
         </div>
       </div>
@@ -161,7 +163,7 @@ export const DoctorDetailPage = () => {
       <div style={styles.actionButtons}>
         <button
           style={styles.messageBtn}
-          onClick={() => navigate(`/shared/chat/${doctor._id}`)}
+          onClick={() => navigate(`/shared/chat/${doctor.user?._id}`)}
         >
           💬 Send Message
         </button>

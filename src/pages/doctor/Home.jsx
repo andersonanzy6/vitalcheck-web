@@ -177,7 +177,7 @@ export const DoctorHome = () => {
                 >
                   <div style={styles.appointmentTime}>
                     <p style={styles.time}>
-                      {new Date(apt.appointmentDate).toLocaleTimeString('en-US', {
+                      {apt.appointmentTime || new Date(apt.appointmentDate).toLocaleTimeString('en-US', {
                         hour: '2-digit',
                         minute: '2-digit',
                       })}
@@ -185,10 +185,10 @@ export const DoctorHome = () => {
                   </div>
                   <div style={styles.appointmentInfo}>
                     <p style={styles.patientName}>
-                      {apt.patientId?.name || 'Patient'}
+                      {apt.patient?.name || 'Patient'}
                     </p>
-                    {apt.appointmentType && (
-                      <p style={styles.appointmentType}>{apt.appointmentType}</p>
+                    {apt.consultationType && (
+                      <p style={styles.appointmentType}>{apt.consultationType}</p>
                     )}
                   </div>
                   <span style={{ ...styles.statusBadge, ...getStatusStyle(apt.status) }}>

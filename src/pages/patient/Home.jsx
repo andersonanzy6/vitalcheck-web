@@ -25,7 +25,7 @@ export const PatientHome = () => {
       setError(null);
       const response = await patientAPI.getAppointments();
       const allAppointments = response.data || [];
-      
+
       // Calculate stats
       const upcoming = allAppointments.filter(
         apt => new Date(apt.appointmentDate) > new Date() && apt.status !== 'cancelled'
@@ -168,13 +168,10 @@ export const PatientHome = () => {
                   </div>
                   <div style={styles.appointmentInfo}>
                     <p style={styles.doctorName}>
-                      {apt.doctorId?.name || 'Doctor'}
+                      Dr. {apt.doctor?.user?.name || 'Doctor'}
                     </p>
                     <p style={styles.appointmentTime}>
-                      {new Date(apt.appointmentDate).toLocaleTimeString('en-US', {
-                        hour: '2-digit',
-                        minute: '2-digit',
-                      })}
+                      {apt.appointmentTime || new Date(apt.appointmentDate).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}
                     </p>
                   </div>
                   <span style={{ ...styles.statusBadge, ...getStatusStyle(apt.status) }}>

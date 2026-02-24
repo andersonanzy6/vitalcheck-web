@@ -39,7 +39,7 @@ export const DoctorsPage = () => {
 
     if (searchTerm) {
       filtered = filtered.filter(doc =>
-        doc.name?.toLowerCase().includes(searchTerm.toLowerCase())
+        doc.user?.name?.toLowerCase().includes(searchTerm.toLowerCase())
       );
     }
 
@@ -119,26 +119,26 @@ export const DoctorsPage = () => {
               onClick={() => navigate(`/shared/doctor-detail/${doctor._id}`)}
             >
               <div style={styles.doctorAvatar}>
-                {doctor.name?.charAt(0).toUpperCase()}
+                {doctor.user?.name?.charAt(0).toUpperCase() || '?'}
               </div>
               <div style={styles.doctorInfo}>
-                <h3 style={styles.doctorName}>{doctor.name}</h3>
+                <h3 style={styles.doctorName}>Dr. {doctor.user?.name || 'Unknown'}</h3>
                 <p style={styles.specialty}>{doctor.specialization || 'General Practitioner'}</p>
                 <p style={styles.experience}>
-                  {doctor.experience || doctor.yearsOfExperience
-                    ? `${doctor.experience || doctor.yearsOfExperience} years experience`
+                  {doctor.experience
+                    ? `${doctor.experience} years experience`
                     : 'Experienced'}
                 </p>
               </div>
               <div style={styles.ratingSection}>
                 <div style={styles.stars}>
                   {[...Array(5)].map((_, i) => (
-                    <span key={i} style={{ color: i < 4 ? '#ffc107' : '#ddd' }}>
+                    <span key={i} style={{ color: i < Math.round(doctor.rating || 0) ? '#ffc107' : '#ddd' }}>
                       ⭐
                     </span>
                   ))}
                 </div>
-                <p style={styles.rating}>4.0</p>
+                <p style={styles.rating}>{doctor.rating ? doctor.rating.toFixed(1) : 'N/A'}</p>
               </div>
             </div>
           ))
@@ -222,7 +222,9 @@ const styles = {
   filterTag: {
     padding: '8px 16px',
     background: 'white',
-    border: '1px solid var(--border-color)',
+    borderWidth: '1px',
+    borderStyle: 'solid',
+    borderColor: 'var(--border-color)',
     borderRadius: '20px',
     fontSize: '12px',
     fontWeight: '500',

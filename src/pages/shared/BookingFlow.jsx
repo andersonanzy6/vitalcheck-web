@@ -11,7 +11,7 @@ export const BookingFlowPage = () => {
   const [formData, setFormData] = useState({
     doctorId: doctorId || '',
     appointmentDate: '',
-    appointmentType: 'consultation',
+    consultationType: 'consultation',
     notes: '',
     symptoms: '',
   });
@@ -34,12 +34,19 @@ export const BookingFlowPage = () => {
     try {
       setLoading(true);
       setError(null);
+      const dateObj = new Date(formData.appointmentDate);
+      const appointmentTime = dateObj.toLocaleTimeString('en-US', {
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: true
+      });
+
       await patientAPI.bookAppointment({
         doctorId: formData.doctorId,
         appointmentDate: formData.appointmentDate,
-        appointmentType: formData.appointmentType,
-        notes: formData.notes,
-        symptoms: formData.symptoms,
+        appointmentTime: appointmentTime,
+        consultationType: formData.consultationType,
+        reasonForVisit: `Symptoms: ${formData.symptoms}. Notes: ${formData.notes}`,
       });
 
       // Show success message
@@ -101,8 +108,8 @@ export const BookingFlowPage = () => {
           <div style={styles.formGroup}>
             <label style={styles.label}>Appointment Type</label>
             <select
-              name="appointmentType"
-              value={formData.appointmentType}
+              name="consultationType"
+              value={formData.consultationType}
               onChange={handleInputChange}
               style={styles.input}
             >
@@ -165,8 +172,8 @@ export const BookingFlowPage = () => {
             </div>
 
             <div style={styles.reviewItem}>
-              <p style={styles.reviewLabel}>Appointment Type</p>
-              <p style={styles.reviewValue}>{formData.appointmentType}</p>
+              <p style={styles.reviewLabel}>Consultation Type</p>
+              <p style={styles.reviewValue}>{formData.consultationType}</p>
             </div>
 
             {formData.symptoms && (

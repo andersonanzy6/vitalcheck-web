@@ -125,8 +125,9 @@ export const AppointmentDetailPage = () => {
     });
   };
 
-  const isPatientView = user?.role === 'patient' || !user?.specialization;
-  const isAppointmentOwner = appointment?.patient?._id === user?._id || appointment?.patientId === user?._id;
+  const currentUserId = (user?.id || user?._id)?.toString();
+  const isPatientView = user?.role === 'patient';
+  const isAppointmentOwner = appointment?.patient?._id?.toString() === currentUserId;
   const canReschedule =
     appointment.status !== 'completed' &&
     appointment.status !== 'cancelled' &&
@@ -150,7 +151,7 @@ export const AppointmentDetailPage = () => {
         <div style={styles.detailItem}>
           <p style={styles.label}>Date & Time</p>
           <p style={styles.value}>
-            {formatDate(appointment.appointmentDate)} at {formatTime(appointment.appointmentDate)}
+            {formatDate(appointment.appointmentDate)} at {appointment.appointmentTime || formatTime(appointment.appointmentDate)}
           </p>
         </div>
 
@@ -160,11 +161,11 @@ export const AppointmentDetailPage = () => {
               <p style={styles.label}>Doctor</p>
               <div style={styles.doctorInfo}>
                 <div style={styles.doctorAvatar}>
-                  {appointment.doctorId?.name?.charAt(0).toUpperCase()}
+                  {appointment.doctor?.user?.name?.charAt(0).toUpperCase()}
                 </div>
                 <div>
-                  <p style={styles.value}>Dr. {appointment.doctorId?.name}</p>
-                  <p style={styles.specialty}>{appointment.doctorId?.specialization}</p>
+                  <p style={styles.value}>Dr. {appointment.doctor?.user?.name}</p>
+                  <p style={styles.specialty}>{appointment.doctor?.specialization}</p>
                 </div>
               </div>
             </div>
@@ -175,21 +176,21 @@ export const AppointmentDetailPage = () => {
               <p style={styles.label}>Patient</p>
               <div style={styles.patientInfo}>
                 <div style={styles.patientAvatar}>
-                  {appointment.patientId?.name?.charAt(0).toUpperCase()}
+                  {appointment.patient?.name?.charAt(0).toUpperCase()}
                 </div>
                 <div>
-                  <p style={styles.value}>{appointment.patientId?.name}</p>
-                  <p style={styles.contact}>📞 {appointment.patientId?.phone}</p>
+                  <p style={styles.value}>{appointment.patient?.name}</p>
+                  <p style={styles.contact}>📞 {appointment.patient?.phone || 'N/A'}</p>
                 </div>
               </div>
             </div>
           </>
         )}
 
-        {appointment.appointmentType && (
+        {appointment.consultationType && (
           <div style={styles.detailItem}>
             <p style={styles.label}>Type</p>
-            <p style={styles.value}>{appointment.appointmentType}</p>
+            <p style={styles.value}>{appointment.consultationType}</p>
           </div>
         )}
 
@@ -220,7 +221,7 @@ export const AppointmentDetailPage = () => {
         <div style={styles.actionSection}>
           <button
             style={styles.messageBtn}
-            onClick={() => navigate(`/shared/chat/${appointment.doctorId?._id}`)}
+            onClick={() => navigate(`/shared/chat/${appointment.doctor?.user?._id}`)}
           >
             💬 Message Doctor
           </button>

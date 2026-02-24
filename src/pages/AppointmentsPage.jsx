@@ -48,7 +48,7 @@ const AppointmentsPage = () => {
   const handleCancelConfirm = async () => {
     try {
       await patientAPI.cancelAppointment(cancelDialog.appointmentId)
-      setAppointments(prev => 
+      setAppointments(prev =>
         prev.filter(apt => apt._id !== cancelDialog.appointmentId)
       )
       setCancelDialog({ show: false, appointmentId: null })
@@ -63,7 +63,7 @@ const AppointmentsPage = () => {
       <Sidebar userRole={user?.role} onLogout={logout} />
       <div className="dashboard-content">
         <Header title={`${user?.role === 'doctor' ? 'Doctor' : 'Patient'} Appointments`} user={user} />
-        
+
         <div className="dashboard-main">
           {loading ? (
             <div className="loading">Loading appointments...</div>
@@ -76,10 +76,10 @@ const AppointmentsPage = () => {
                   {appointments.map(apt => (
                     <div key={apt._id} className="appointment-detail-card">
                       <div className="apt-header">
-                        <h3>{user?.role === 'doctor' ? apt.patientName : apt.doctorName} {apt.doctorSpecialization && `- ${apt.doctorSpecialization}`}</h3>
+                        <h3>{user?.role === 'doctor' ? apt.patient?.name : apt.doctor?.user?.name} {apt.doctor?.specialization && `- ${apt.doctor?.specialization}`}</h3>
                         <span className={`apt-status status-${apt.status}`}>{apt.status}</span>
                       </div>
-                      
+
                       <div className="apt-content">
                         <div className="apt-detail">
                           <icon>📅</icon>
@@ -88,12 +88,12 @@ const AppointmentsPage = () => {
                             <p>{new Date(apt.appointmentDate).toLocaleDateString()} at {apt.appointmentTime}</p>
                           </div>
                         </div>
-                        
+
                         <div className="apt-detail">
                           <icon>📝</icon>
                           <div>
                             <strong>Type</strong>
-                            <p>{apt.appointmentType}</p>
+                            <p>{apt.consultationType}</p>
                           </div>
                         </div>
 
@@ -123,22 +123,22 @@ const AppointmentsPage = () => {
                           <>
                             {user?.role === 'doctor' && (
                               <>
-                                <button 
+                                <button
                                   className="btn btn-accept"
-                                  onClick={() => {/* Handle accept */}}
+                                  onClick={() => {/* Handle accept */ }}
                                 >
                                   ✓ Accept
                                 </button>
-                                <button 
+                                <button
                                   className="btn btn-decline"
-                                  onClick={() => {/* Handle decline */}}
+                                  onClick={() => {/* Handle decline */ }}
                                 >
                                   ✕ Decline
                                 </button>
                               </>
                             )}
                             {user?.role === 'patient' && (
-                              <button 
+                              <button
                                 className="btn btn-cancel"
                                 onClick={() => handleCancelRequest(apt._id)}
                               >
@@ -155,7 +155,7 @@ const AppointmentsPage = () => {
                 <div className="no-appointments">
                   <p>No appointments found</p>
                   {user?.role === 'patient' && (
-                    <button 
+                    <button
                       className="btn btn-primary"
                       onClick={() => navigate('/patient/book-appointment')}
                     >
@@ -176,13 +176,13 @@ const AppointmentsPage = () => {
             <h3>Cancel Appointment?</h3>
             <p>Are you sure you want to cancel this appointment?</p>
             <div className="modal-actions">
-              <button 
+              <button
                 className="btn btn-secondary"
                 onClick={() => setCancelDialog({ show: false, appointmentId: null })}
               >
                 Keep Appointment
               </button>
-              <button 
+              <button
                 className="btn btn-danger"
                 onClick={handleCancelConfirm}
               >

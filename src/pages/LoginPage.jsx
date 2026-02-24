@@ -24,9 +24,9 @@ const LoginPage = () => {
       await login(user, token)
       
       if (user.role === 'doctor') {
-        navigate('/doctor/dashboard')
+        navigate('/doctor/home')
       } else {
-        navigate('/patient/dashboard')
+        navigate('/patient/home')
       }
     } catch (err) {
       setError(err.response?.data?.message || 'Login failed. Please try again.')

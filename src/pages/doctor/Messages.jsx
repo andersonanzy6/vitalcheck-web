@@ -87,6 +87,9 @@ export const DoctorMessagesPage = () => {
             const otherParticipant = conversation.partner;
             const lastMessage = conversation.lastMessage;
             const isUnread = conversation.unreadCount > 0;
+            const lastMessagePreview = lastMessage?.message ? 
+              (lastMessage.sender?._id === user?._id ? `You: ${lastMessage.message}` : lastMessage.message) 
+              : 'No messages yet';
 
             return (
               <div
@@ -109,7 +112,7 @@ export const DoctorMessagesPage = () => {
                     </span>
                   </div>
                   <p style={styles.lastMessage}>
-                    {lastMessage?.message || 'No messages yet'}
+                    {lastMessagePreview}
                   </p>
                 </div>
 

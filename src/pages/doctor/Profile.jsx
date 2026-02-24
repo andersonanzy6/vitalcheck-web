@@ -5,22 +5,59 @@ import { doctorAPI } from '../../services/apiClient';
 
 export const DoctorProfilePage = () => {
   const navigate = useNavigate();
-  const { user, logout } = useAuth();
+  const { user, logout, updateUser } = useAuth();
   const [isEditing, setIsEditing] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [successMessage, setSuccessMessage] = useState('');
+  const [doctorProfile, setDoctorProfile] = useState(null);
+  const [profileImage, setProfileImage] = useState(null);
+  const [coverImage, setCoverImage] = useState(null);
+  const [profilePreview, setProfilePreview] = useState(user?.profileImage || null);
+  const [coverPreview, setCoverPreview] = useState(user?.coverImage || null);
   const [formData, setFormData] = useState({
     name: user?.name || '',
     email: user?.email || '',
-    phone: user?.phone || '',
-    specialization: user?.specialization || '',
-    yearsOfExperience: user?.yearsOfExperience || '',
-    bio: user?.bio || '',
-    licenseNumber: user?.licenseNumber || '',
-    clinicAddress: user?.clinicAddress || '',
-    consultationFee: user?.consultationFee || '',
+    phone: '',
+    specialization: '',
+    yearsOfExperience: '',
+    bio: '',
+    licenseNumber: '',
+    clinicAddress: '',
+    consultationFee: '',
   });
+
+  useEffect(() => {
+    fetchDoctorProfile();
+  }, []);
+
+  const fetchDoctorProfile = async () => {
+    try {
+      const res = await doctorAPI.updateDoctorProfileFields({});
+    } catch {
+      // Try GET by fetching from /doctors endpoint via profile
+    }
+    // Fetch the doctor's own profile
+    try {
+      const res = await doctorAPI.getProfile();
+      const profile = res.data?.doctorProfile || res.data;
+      if (profile) {
+        setDoctorProfile(profile);
+        setFormData(prev => ({
+          ...prev,
+          phone: profile.phone || '',
+          specialization: profile.specialization || '',
+          yearsOfExperience: profile.experience || '',
+          bio: profile.bio || '',
+          licenseNumber: profile.licenseNumber || '',
+          clinicAddress: profile.clinicAddress || '',
+          consultationFee: profile.consultationFee || '',
+        }));
+      }
+    } catch (err) {
+      console.error('Error fetching doctor profile:', err);
+    }
+  };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -31,14 +68,55 @@ export const DoctorProfilePage = () => {
     setError(null);
   };
 
+  const handleFileChange = (e) => {
+    const { name, files } = e.target;
+    const file = files[0];
+    if (!file) return;
+
+    if (name === 'profileImage') {
+      setProfileImage(file);
+      setProfilePreview(URL.createObjectURL(file));
+    } else if (name === 'coverImage') {
+      setCoverImage(file);
+      setCoverPreview(URL.createObjectURL(file));
+    }
+  };
+
   const handleSave = async () => {
     try {
       setLoading(true);
       setError(null);
-      await doctorAPI.updateProfile(formData);
+
+      // Create FormData to handle both regular fields and files
+      const data = new FormData();
+      data.append('name', formData.name);
+      // Backend expects these fields in updateProfile
+      if (profileImage) data.append('profileImage', profileImage);
+      if (coverImage) data.append('coverImage', coverImage);
+
+
+      // Update user fields (name, images)
+      const userResponse = await doctorAPI.updateProfile(data);
+      const updatedUser = userResponse.data.user;
+
+      // Update doctor-specific fields
+      const doctorResponse = await doctorAPI.updateDoctorProfileFields({
+        specialization: formData.specialization,
+        experience: formData.yearsOfExperience,
+        bio: formData.bio,
+        licenseNumber: formData.licenseNumber,
+        clinicAddress: formData.clinicAddress,
+        consultationFee: formData.consultationFee ? Number(formData.consultationFee) : undefined,
+        phone: formData.phone,
+      });
+
+      updateUser({ ...user, ...updatedUser });
+      setDoctorProfile(doctorResponse.data);
+
       setSuccessMessage('Profile updated successfully');
       setIsEditing(false);
       setTimeout(() => setSuccessMessage(''), 3000);
+      fetchDoctorProfile();
     } catch (err) {
       console.error('Error updating profile:', err);
       setError(err.response?.data?.message || 'Failed to update profile');
@@ -57,12 +135,22 @@ export const DoctorProfilePage = () => {
   return (
     <div style={styles.container}>
       {/* Header with Profile Avatar */}
-      <div style={styles.profileHeader}>
+      <div style={{
+        ...styles.profileHeader,
+        backgroundImage: coverPreview ? `url(${coverPreview})` : 'var(--gradient)',
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        position: 'relative'
+      }}>
         <div style={styles.avatar}>
-          {user?.name?.charAt(0).toUpperCase()}
+          {profilePreview ? (
+            <img src={profilePreview} alt="Profile" style={styles.avatarImg} />
+          ) : (
+            user?.name?.charAt(0).toUpperCase()
+          )}
         </div>
         <h2 style={styles.greeting}>Dr. {user?.name?.split(' ').slice(-1)[0]}</h2>
-        <p style={styles.specialization}>{user?.specialization || 'Medical Professional'}</p>
+        <p style={styles.specialization}>{user?.specialization || doctorProfile?.specialization || 'Medical Professional'}</p>
         <p style={styles.email}>{user?.email}</p>
       </div>
 
@@ -87,7 +175,36 @@ export const DoctorProfilePage = () => {
 
       {/* Profile Form */}
       <div style={styles.formSection}>
-        <h3 style={styles.sectionTitle}>Professional Information</h3>
+        <h3 style={styles.sectionTitle}>Profile Images</h3>
+
+        {isEditing ? (
+          <>
+            <div style={styles.formGroup}>
+              <label style={styles.label}>Profile Picture</label>
+              <input
+                type="file"
+                name="profileImage"
+                onChange={handleFileChange}
+                accept="image/*"
+                style={styles.input}
+              />
+            </div>
+            <div style={styles.formGroup}>
+              <label style={styles.label}>Cover Photo</label>
+              <input
+                type="file"
+                name="coverImage"
+                onChange={handleFileChange}
+                accept="image/*"
+                style={styles.input}
+              />
+            </div>
+          </>
+        ) : (
+          <p style={styles.value}>Click Edit to change your profile and cover photos</p>
+        )}
+
+        <h3 style={{ ...styles.sectionTitle, marginTop: '24px' }}>Professional Information</h3>
 
         {/* Name */}
         <div style={styles.formGroup}>
@@ -260,6 +377,10 @@ export const DoctorProfilePage = () => {
                   clinicAddress: user?.clinicAddress || '',
                   consultationFee: user?.consultationFee || '',
                 });
+                setProfilePreview(user?.profileImage || null);
+                setCoverPreview(user?.coverImage || null);
+                setProfileImage(null);
+                setCoverImage(null);
               }}
             >
               Cancel
@@ -305,6 +426,12 @@ const styles = {
     fontSize: '32px',
     fontWeight: '700',
     margin: '0 auto 16px',
+    overflow: 'hidden',
+  },
+  avatarImg: {
+    width: '100%',
+    height: '100%',
+    objectFit: 'cover',
   },
   greeting: {
     fontSize: '22px',

@@ -14,7 +14,7 @@ const BookingPage = () => {
   const [bookingData, setBookingData] = useState({
     appointmentDate: '',
     appointmentTime: '',
-    appointmentType: 'consultation',
+    consultationType: 'consultation',
     symptoms: '',
     notes: '',
   })
@@ -49,7 +49,7 @@ const BookingPage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault()
-    
+
     if (!selectedDoctorId) {
       setError('Please select a doctor')
       return
@@ -61,7 +61,10 @@ const BookingPage = () => {
     try {
       await patientAPI.bookAppointment({
         doctorId: selectedDoctorId,
-        ...bookingData
+        appointmentDate: bookingData.appointmentDate,
+        appointmentTime: bookingData.appointmentTime,
+        consultationType: bookingData.consultationType,
+        reasonForVisit: `Symptoms: ${bookingData.symptoms}. Notes: ${bookingData.notes}`,
       })
       setSuccess('Appointment booked successfully!')
       setTimeout(() => {
@@ -79,11 +82,11 @@ const BookingPage = () => {
       <Sidebar userRole="patient" onLogout={logout} />
       <div className="dashboard-content">
         <Header title="Book Appointment" user={user} />
-        
+
         <div className="dashboard-main">
           <div className="booking-card">
             <h2>Schedule Your Appointment</h2>
-            
+
             <form onSubmit={handleSubmit} className="booking-form">
               <div className="form-section">
                 <h3>Select a Doctor</h3>
@@ -113,7 +116,7 @@ const BookingPage = () => {
 
               <div className="form-section">
                 <h3>Appointment Details</h3>
-                
+
                 <div className="form-row">
                   <div className="form-group">
                     <label>Appointment Date</label>
@@ -142,8 +145,8 @@ const BookingPage = () => {
                   <div className="form-group">
                     <label>Type of Appointment</label>
                     <select
-                      name="appointmentType"
-                      value={bookingData.appointmentType}
+                      name="consultationType"
+                      value={bookingData.consultationType}
                       onChange={handleChange}
                     >
                       <option value="consultation">Consultation</option>

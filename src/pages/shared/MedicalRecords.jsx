@@ -121,6 +121,15 @@ export const MedicalRecordsPage = () => {
     return icons[type] || '📄';
   };
 
+  const formatDate = (dateString, fallback) => {
+    const d = new Date(dateString || fallback);
+    return isNaN(d.getTime()) ? 'Date unavailable' : d.toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+    });
+  };
+
   if (loading && records.length === 0) {
     return (
       <div style={styles.container}>
@@ -231,6 +240,7 @@ export const MedicalRecordsPage = () => {
                   title: '',
                   description: '',
                   date: new Date().toISOString().split('T')[0],
+                  patientId: '',
                 });
                 setSelectedFile(null);
               }}
@@ -254,11 +264,7 @@ export const MedicalRecordsPage = () => {
                 <h3 style={styles.recordTitle}>{record.title}</h3>
                 <p style={styles.recordType}>{record.recordType.replace('_', ' ').toUpperCase()}</p>
                 <p style={styles.recordDate}>
-                  {new Date(record.date).toLocaleDateString('en-US', {
-                    year: 'numeric',
-                    month: 'long',
-                    day: 'numeric',
-                  })}
+                  {formatDate(record.date, record.createdAt)}
                 </p>
                 {record.description && (
                   <p style={styles.recordDescription}>{record.description}</p>

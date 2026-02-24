@@ -22,13 +22,13 @@ const PatientDashboard = () => {
       setLoading(true)
       const response = await patientAPI.getAppointments()
       const appointments = response.data
-      
+
       // Filter upcoming appointments (future dates)
       const upcoming = appointments.filter(apt => {
         const aptDate = new Date(apt.appointmentDate)
         return aptDate > new Date() && apt.status !== 'cancelled'
       }).slice(0, 5)
-      
+
       setUpcomingAppointments(upcoming)
     } catch (err) {
       setError('Failed to load dashboard data')
@@ -48,7 +48,7 @@ const PatientDashboard = () => {
       <Sidebar userRole="patient" onLogout={handleLogout} />
       <div className="dashboard-content">
         <Header title="Patient Dashboard" user={user} />
-        
+
         <div className="dashboard-main">
           {loading ? (
             <div className="loading">Loading dashboard...</div>
@@ -62,17 +62,17 @@ const PatientDashboard = () => {
               </div>
 
               <div className="quick-actions">
-                <ActionButton 
+                <ActionButton
                   label="Book Appointment"
                   icon="📅"
                   onClick={() => navigate('/patient/book-appointment')}
                 />
-                <ActionButton 
+                <ActionButton
                   label="View Appointments"
                   icon="📋"
                   onClick={() => navigate('/appointments')}
                 />
-                <ActionButton 
+                <ActionButton
                   label="My Profile"
                   icon="👤"
                   onClick={() => navigate('/patient/profile')}
@@ -86,13 +86,13 @@ const PatientDashboard = () => {
                     {upcomingAppointments.map(apt => (
                       <div key={apt._id} className="appointment-item">
                         <div className="appointment-info">
-                          <h3>{apt.doctorName || 'Doctor'}</h3>
+                          <h3>Dr. {apt.doctor?.user?.name || 'Doctor'}</h3>
                           <p className="appointment-date">
-                            📅 {new Date(apt.appointmentDate).toLocaleDateString()} at {apt.appointmentTime}
+                            📅 {new Date(apt.appointmentDate).toLocaleDateString()} at {apt.appointmentTime || apt.appointmentDate}
                           </p>
-                          <p className="appointment-type">{apt.appointmentType}</p>
+                          <p className="appointment-type">{apt.consultationType}</p>
                         </div>
-                        <button 
+                        <button
                           className="view-btn"
                           onClick={() => navigate(`/appointments/${apt._id}`)}
                         >

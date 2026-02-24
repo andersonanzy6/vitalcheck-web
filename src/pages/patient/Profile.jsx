@@ -5,11 +5,15 @@ import { patientAPI } from '../../services/apiClient';
 
 export const ProfilePage = () => {
   const navigate = useNavigate();
-  const { user, logout } = useAuth();
+  const { user, logout, updateUser } = useAuth();
   const [isEditing, setIsEditing] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [successMessage, setSuccessMessage] = useState('');
+  const [profileImage, setProfileImage] = useState(null);
+  const [coverImage, setCoverImage] = useState(null);
+  const [profilePreview, setProfilePreview] = useState(user?.profileImage || null);
+  const [coverPreview, setCoverPreview] = useState(user?.coverImage || null);
   const [formData, setFormData] = useState({
     name: user?.name || '',
     email: user?.email || '',
@@ -30,11 +34,44 @@ export const ProfilePage = () => {
     setError(null);
   };
 
+  const handleFileChange = (e) => {
+    const { name, files } = e.target;
+    const file = files[0];
+    if (!file) return;
+
+    if (name === 'profileImage') {
+      setProfileImage(file);
+      setProfilePreview(URL.createObjectURL(file));
+    } else if (name === 'coverImage') {
+      setCoverImage(file);
+      setCoverPreview(URL.createObjectURL(file));
+    }
+  };
+
   const handleSave = async () => {
     try {
       setLoading(true);
       setError(null);
-      await patientAPI.updateProfile(formData);
+
+      const data = new FormData();
+      data.append('name', formData.name);
+      data.append('phone', formData.phone);
+      data.append('age', formData.age);
+      data.append('gender', formData.gender);
+      data.append('address', formData.address);
+      data.append('medicalHistory', formData.medicalHistory);
+      data.append('bloodGroup', formData.bloodGroup);
+      data.append('bio', formData.bio || '');
+
+      if (profileImage) data.append('profileImage', profileImage);
+      if (coverImage) data.append('coverImage', coverImage);
+
+      const response = await patientAPI.updateProfile(data);
+
+      // Update local storage/context
+      const updatedUser = response.data.user;
+      updateUser({ ...user, ...updatedUser });
+
       setSuccessMessage('Profile updated successfully');
       setIsEditing(false);
       setTimeout(() => setSuccessMessage(''), 3000);
@@ -56,9 +93,19 @@ export const ProfilePage = () => {
   return (
     <div style={styles.container}>
       {/* Header with Profile Avatar */}
-      <div style={styles.profileHeader}>
+      <div style={{
+        ...styles.profileHeader,
+        backgroundImage: coverPreview ? `url(${coverPreview})` : 'var(--gradient)',
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        position: 'relative'
+      }}>
         <div style={styles.avatar}>
-          {user?.name?.charAt(0).toUpperCase()}
+          {profilePreview ? (
+            <img src={profilePreview} alt="Profile" style={styles.avatarImg} />
+          ) : (
+            user?.name?.charAt(0).toUpperCase()
+          )}
         </div>
         <h2 style={styles.greeting}>Welcome, {user?.name?.split(' ')[0]}</h2>
         <p style={styles.email}>{user?.email}</p>
@@ -85,7 +132,36 @@ export const ProfilePage = () => {
 
       {/* Profile Form */}
       <div style={styles.formSection}>
-        <h3 style={styles.sectionTitle}>Personal Information</h3>
+        <h3 style={styles.sectionTitle}>Profile Images</h3>
+
+        {isEditing ? (
+          <>
+            <div style={styles.formGroup}>
+              <label style={styles.label}>Profile Picture</label>
+              <input
+                type="file"
+                name="profileImage"
+                onChange={handleFileChange}
+                accept="image/*"
+                style={styles.input}
+              />
+            </div>
+            <div style={styles.formGroup}>
+              <label style={styles.label}>Cover Photo</label>
+              <input
+                type="file"
+                name="coverImage"
+                onChange={handleFileChange}
+                accept="image/*"
+                style={styles.input}
+              />
+            </div>
+          </>
+        ) : (
+          <p style={styles.value}>Click Edit to change your profile and cover photos</p>
+        )}
+
+        <h3 style={{ ...styles.sectionTitle, marginTop: '24px' }}>Personal Information</h3>
 
         {/* Name */}
         <div style={styles.formGroup}>
@@ -247,6 +323,10 @@ export const ProfilePage = () => {
                   medicalHistory: user?.medicalHistory || '',
                   bloodGroup: user?.bloodGroup || '',
                 });
+                setProfilePreview(user?.profileImage || null);
+                setCoverPreview(user?.coverImage || null);
+                setProfileImage(null);
+                setCoverImage(null);
               }}
             >
               Cancel
@@ -315,6 +395,12 @@ const styles = {
     fontSize: '32px',
     fontWeight: '700',
     margin: '0 auto 16px',
+    overflow: 'hidden',
+  },
+  avatarImg: {
+    width: '100%',
+    height: '100%',
+    objectFit: 'cover',
   },
   greeting: {
     fontSize: '22px',

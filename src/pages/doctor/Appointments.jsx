@@ -142,18 +142,18 @@ export const DoctorAppointmentsPage = () => {
             >
               <div style={styles.dateTimeSection}>
                 <p style={styles.date}>{formatDate(apt.appointmentDate)}</p>
-                <p style={styles.time}>{formatTime(apt.appointmentDate)}</p>
+                <p style={styles.time}>{apt.appointmentTime || formatTime(apt.appointmentDate)}</p>
               </div>
 
               <div style={styles.appointmentDetails}>
                 <h3 style={styles.patientName}>
-                  {apt.patientId?.name || 'Patient'}
+                  {apt.patient?.name || 'Patient'}
                 </h3>
                 <p style={styles.patientContact}>
-                  📞 {apt.patientId?.phone || 'N/A'}
+                  📞 {apt.patient?.email || 'N/A'}
                 </p>
-                {apt.appointmentType && (
-                  <p style={styles.appointmentType}>{apt.appointmentType}</p>
+                {apt.consultationType && (
+                  <p style={styles.appointmentType}>{apt.consultationType}</p>
                 )}
               </div>
 
