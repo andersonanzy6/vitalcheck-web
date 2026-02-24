@@ -5,9 +5,6 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://vitalcheck-56
 const apiClient = axios.create({
   baseURL: API_BASE_URL,
   timeout: 30000,
-  headers: {
-    'Content-Type': 'application/json',
-  },
 })
 
 // Request interceptor to add token
@@ -95,7 +92,7 @@ export const medicalRecordsAPI = {
   getRecords: () =>
     apiClient.get('/medical-records'),
   addRecord: (data) =>
-    apiClient.post('/medical-records', data),
+    apiClient.post('/medical-records/upload', data),
   updateRecord: (id, data) =>
     apiClient.put(`/medical-records/${id}`, data),
   deleteRecord: (id) =>

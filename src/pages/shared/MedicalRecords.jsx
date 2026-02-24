@@ -8,12 +8,13 @@ export const MedicalRecordsPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [showAddForm, setShowAddForm] = useState(false);
+  const [selectedFile, setSelectedFile] = useState(null);
   const [formData, setFormData] = useState({
     recordType: 'prescription',
     title: '',
     description: '',
     date: new Date().toISOString().split('T')[0],
-    fileUrl: '',
+    patientId: '', // Required for doctors
   });
 
   useEffect(() => {
@@ -43,26 +44,57 @@ export const MedicalRecordsPage = () => {
     }));
   };
 
+  const handleFileChange = (e) => {
+    setSelectedFile(e.target.files[0]);
+  };
+
   const handleAddRecord = async () => {
     if (!formData.title) {
       alert('Please fill in the title');
       return;
     }
 
+    if (!selectedFile) {
+      alert('Please select a file to upload');
+      return;
+    }
+
     try {
-      await medicalRecordsAPI.addRecord(formData);
+      setLoading(true);
+      const data = new FormData();
+      data.append('file', selectedFile);
+      data.append('title', formData.title);
+      data.append('recordType', formData.recordType);
+      data.append('description', formData.description);
+      data.append('date', formData.date);
+
+      if (user.role === 'doctor') {
+        if (!formData.patientId) {
+          alert('Please enter a Patient ID');
+          setLoading(false);
+          return;
+        }
+        data.append('patientId', formData.patientId);
+      }
+
+      await medicalRecordsAPI.addRecord(data);
+
       setFormData({
         recordType: 'prescription',
         title: '',
         description: '',
         date: new Date().toISOString().split('T')[0],
-        fileUrl: '',
+        patientId: '',
       });
+      setSelectedFile(null);
       setShowAddForm(false);
       fetchRecords();
     } catch (err) {
       console.error('Error adding record:', err);
-      alert('Failed to add medical record');
+      const errorMsg = err.response?.data?.message || err.message;
+      alert(`Failed to add medical record: ${errorMsg}`);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -81,17 +113,15 @@ export const MedicalRecordsPage = () => {
   const getRecordIcon = (type) => {
     const icons = {
       prescription: '💊',
-      lab_report: '🧪',
-      xray: '🩻',
-      diagnosis: '📋',
-      vaccination: '💉',
-      allergy: '⚠️',
+      lab_result: '🧪',
+      medical_image: '🩻',
+      report: '📋',
       other: '📄',
     };
     return icons[type] || '📄';
   };
 
-  if (loading) {
+  if (loading && records.length === 0) {
     return (
       <div style={styles.container}>
         <p style={{ textAlign: 'center', padding: '40px 20px' }}>Loading records...</p>
@@ -104,14 +134,14 @@ export const MedicalRecordsPage = () => {
       <div style={styles.header}>
         <h2 style={styles.title}>Medical Records</h2>
         <button style={styles.addBtn} onClick={() => setShowAddForm(!showAddForm)}>
-          + Add Record
+          {showAddForm ? 'Cancel' : '+ Add Record'}
         </button>
       </div>
 
       {/* Add Record Form */}
       {showAddForm && (
         <div style={styles.formSection}>
-          <h3 style={styles.formTitle}>Add New Record</h3>
+          <h3 style={styles.formTitle}>Upload New Record</h3>
 
           <div style={styles.formGroup}>
             <label style={styles.label}>Record Type</label>
@@ -122,14 +152,26 @@ export const MedicalRecordsPage = () => {
               style={styles.input}
             >
               <option value="prescription">Prescription</option>
-              <option value="lab_report">Lab Report</option>
-              <option value="xray">X-Ray</option>
-              <option value="diagnosis">Diagnosis</option>
-              <option value="vaccination">Vaccination</option>
-              <option value="allergy">Allergy Alert</option>
+              <option value="lab_result">Lab Result</option>
+              <option value="medical_image">Medical Image (X-Ray/MRI)</option>
+              <option value="report">Medical Report</option>
               <option value="other">Other</option>
             </select>
           </div>
+
+          {user.role === 'doctor' && (
+            <div style={styles.formGroup}>
+              <label style={styles.label}>Patient ID</label>
+              <input
+                type="text"
+                name="patientId"
+                value={formData.patientId}
+                onChange={handleInputChange}
+                placeholder="Paste the patient's ID here"
+                style={styles.input}
+              />
+            </div>
+          )}
 
           <div style={styles.formGroup}>
             <label style={styles.label}>Title</label>
@@ -166,20 +208,19 @@ export const MedicalRecordsPage = () => {
           </div>
 
           <div style={styles.formGroup}>
-            <label style={styles.label}>File URL (Optional)</label>
+            <label style={styles.label}>File Upload</label>
             <input
-              type="url"
-              name="fileUrl"
-              value={formData.fileUrl}
-              onChange={handleInputChange}
-              placeholder="https://..."
-              style={styles.input}
+              type="file"
+              onChange={handleFileChange}
+              style={styles.fileInput}
+              accept="image/*,application/pdf"
             />
+            {selectedFile && <p style={styles.fileHint}>Selected: {selectedFile.name}</p>}
           </div>
 
           <div style={styles.formActions}>
-            <button style={styles.saveBtn} onClick={handleAddRecord}>
-              Save Record
+            <button style={styles.saveBtn} onClick={handleAddRecord} disabled={loading}>
+              {loading ? 'Uploading...' : 'Upload & Save'}
             </button>
             <button
               style={styles.cancelBtn}
@@ -190,8 +231,8 @@ export const MedicalRecordsPage = () => {
                   title: '',
                   description: '',
                   date: new Date().toISOString().split('T')[0],
-                  fileUrl: '',
                 });
+                setSelectedFile(null);
               }}
             >
               Cancel
@@ -441,6 +482,21 @@ const styles = {
     textAlign: 'center',
     color: '#d32f2f',
     fontSize: '13px',
+  },
+  fileInput: {
+    width: '100%',
+    padding: '8px 12px',
+    border: '1px dashed var(--border-color)',
+    borderRadius: '8px',
+    fontSize: '14px',
+    cursor: 'pointer',
+    background: 'var(--light-gray)',
+  },
+  fileHint: {
+    fontSize: '12px',
+    color: 'var(--secondary-color)',
+    margin: '4px 0 0 0',
+    fontWeight: '500',
   },
 };
 
