@@ -94,6 +94,11 @@ export const DoctorProfilePage = () => {
       if (profileImage) data.append('profileImage', profileImage);
       if (coverImage) data.append('coverImage', coverImage);
 
+      // Also sync these with the User model for consistency
+      if (formData.bio) data.append('bio', formData.bio);
+      if (formData.phone) data.append('phone', formData.phone);
+      if (formData.clinicAddress) data.append('address', formData.clinicAddress);
+
 
       // Update user fields (name, images)
       const userResponse = await doctorAPI.updateProfile(data);
@@ -372,10 +377,10 @@ export const DoctorProfilePage = () => {
                   phone: user?.phone || '',
                   specialization: user?.specialization || '',
                   yearsOfExperience: user?.yearsOfExperience || '',
-                  bio: user?.bio || '',
-                  licenseNumber: user?.licenseNumber || '',
-                  clinicAddress: user?.clinicAddress || '',
-                  consultationFee: user?.consultationFee || '',
+                  bio: doctorProfile?.bio || user?.bio || '',
+                  licenseNumber: doctorProfile?.licenseNumber || '',
+                  clinicAddress: doctorProfile?.clinicAddress || user?.address || '',
+                  consultationFee: doctorProfile?.consultationFee || '',
                 });
                 setProfilePreview(user?.profileImage || null);
                 setCoverPreview(user?.coverImage || null);
