@@ -1,6 +1,18 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext.jsx';
 import { notificationAPI } from '../../services/apiClient';
+import {
+  CheckCircle,
+  Bell,
+  MessageSquare,
+  XCircle,
+  Calendar,
+  Trash2,
+  Check,
+  MoreVertical,
+  Inbox,
+  Clock
+} from 'lucide-react';
 
 export const NotificationsPage = () => {
   const { user } = useAuth();
@@ -72,14 +84,20 @@ export const NotificationsPage = () => {
   };
 
   const getNotificationIcon = (type) => {
-    const icons = {
-      appointment_confirmed: '✅',
-      appointment_reminder: '🔔',
-      message: '💬',
-      appointment_cancelled: '❌',
-      appointment_rescheduled: '📅',
-    };
-    return icons[type] || '📬';
+    switch (type) {
+      case 'appointment_confirmed':
+        return <CheckCircle size={20} color="var(--success-color)" />;
+      case 'appointment_reminder':
+        return <Bell size={20} color="var(--primary-color)" />;
+      case 'message':
+        return <MessageSquare size={20} color="var(--primary-color)" />;
+      case 'appointment_cancelled':
+        return <XCircle size={20} color="var(--danger-color)" />;
+      case 'appointment_rescheduled':
+        return <Calendar size={20} color="#f59e0b" />;
+      default:
+        return <Inbox size={20} color="var(--text-light)" />;
+    }
   };
 
   const unreadCount = notifications.filter(notif => !notif.isRead).length;
@@ -111,13 +129,14 @@ export const NotificationsPage = () => {
         <h2 style={styles.title}>Notifications</h2>
         {unreadCount > 0 && (
           <button style={styles.markAllBtn} onClick={handleMarkAllAsRead}>
-            Mark all as read
+            <Check size={14} /> Mark all as read
           </button>
         )}
       </div>
 
       {unreadCount > 0 && (
         <div style={styles.unreadBanner}>
+          <Bell size={16} />
           <p style={styles.unreadText}>You have {unreadCount} unread notification{unreadCount > 1 ? 's' : ''}</p>
         </div>
       )}
@@ -164,17 +183,17 @@ export const NotificationsPage = () => {
                   }}
                   title="Delete"
                 >
-                  ✕
+                  <Trash2 size={16} />
                 </button>
               </div>
             </div>
           ))
         ) : (
           <div style={styles.emptyState}>
-            <p style={styles.emptyStateIcon}>🔔</p>
-            <p style={styles.emptyStateText}>No notifications yet</p>
+            <div style={styles.emptyIconWrapper}><Bell size={48} /></div>
+            <p style={styles.emptyStateText}>All caught up!</p>
             <p style={styles.emptyStateSubtext}>
-              You'll receive notifications about your appointments and messages
+              You don't have any notifications right now.
             </p>
           </div>
         )}
@@ -187,101 +206,118 @@ const styles = {
   container: {
     flex: 1,
     overflowY: 'auto',
+    padding: '24px',
   },
   header: {
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: '16px',
+    marginBottom: '32px',
   },
   title: {
-    fontSize: '24px',
-    fontWeight: '700',
-    margin: '0',
-  },
-  markAllBtn: {
-    background: 'transparent',
-    border: 'none',
-    color: 'var(--secondary-color)',
-    fontSize: '12px',
-    fontWeight: '600',
-    cursor: 'pointer',
-    padding: '0',
-  },
-  unreadBanner: {
-    background: 'var(--light-gray)',
-    border: '1px solid var(--border-color)',
-    borderRadius: '8px',
-    padding: '12px 16px',
-    marginBottom: '16px',
-  },
-  unreadText: {
-    fontSize: '13px',
-    fontWeight: '500',
+    fontSize: '28px',
+    fontWeight: '800',
     margin: '0',
     color: 'var(--text-color)',
+  },
+  markAllBtn: {
+    background: 'white',
+    border: '1px solid var(--border-color)',
+    color: 'var(--primary-color)',
+    fontSize: '13px',
+    fontWeight: '700',
+    cursor: 'pointer',
+    padding: '8px 16px',
+    borderRadius: '10px',
+    display: 'flex',
+    alignItems: 'center',
+    gap: '6px',
+    boxShadow: '0 1px 2px rgba(0,0,0,0.05)',
+  },
+  unreadBanner: {
+    background: 'rgba(0, 102, 204, 0.05)',
+    border: '1px solid rgba(0, 102, 204, 0.1)',
+    borderRadius: '12px',
+    padding: '12px 20px',
+    marginBottom: '24px',
+    display: 'flex',
+    alignItems: 'center',
+    gap: '12px',
+    color: 'var(--primary-color)',
+  },
+  unreadText: {
+    fontSize: '14px',
+    fontWeight: '600',
+    margin: '0',
   },
   notificationsList: {
     display: 'flex',
     flexDirection: 'column',
-    gap: '12px',
+    gap: '16px',
   },
   notificationItem: {
     display: 'flex',
-    gap: '12px',
+    gap: '16px',
     background: 'white',
-    border: '1px solid var(--border-color)',
-    borderRadius: '12px',
-    padding: '16px',
+    borderRadius: '16px',
+    padding: '20px',
     alignItems: 'flex-start',
     cursor: 'pointer',
     transition: 'all 0.2s ease',
+    boxShadow: 'var(--shadow)',
+    position: 'relative',
+    overflow: 'hidden',
   },
   notificationItemUnread: {
-    background: 'var(--light-gray)',
-    borderColor: 'var(--secondary-color)',
-    borderWidth: '2px',
+    background: 'white',
+    borderLeft: '4px solid var(--primary-color)',
   },
   notificationIcon: {
-    fontSize: '24px',
+    width: '44px',
+    height: '44px',
+    borderRadius: '12px',
+    background: 'var(--light-gray)',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
     flexShrink: 0,
-    marginTop: '2px',
   },
   notificationContent: {
     flex: 1,
     minWidth: 0,
   },
   notificationTitle: {
-    fontSize: '14px',
-    fontWeight: '600',
+    fontSize: '15px',
+    fontWeight: '700',
     margin: '0 0 4px 0',
     color: 'var(--text-color)',
   },
   notificationMessage: {
-    fontSize: '13px',
-    color: 'var(--text-light)',
-    margin: '0 0 8px 0',
-    lineHeight: '1.4',
+    fontSize: '14px',
+    color: '#475569',
+    margin: '0 0 10px 0',
+    lineHeight: '1.5',
   },
   notificationTime: {
-    fontSize: '11px',
+    fontSize: '12px',
     color: 'var(--text-light)',
-    margin: '0',
+    display: 'flex',
+    alignItems: 'center',
+    gap: '4px',
+    fontWeight: '500',
   },
   notificationActions: {
     display: 'flex',
-    gap: '8px',
+    gap: '10px',
     flexShrink: 0,
   },
   iconBtn: {
     background: 'transparent',
     border: 'none',
-    color: 'var(--secondary-color)',
-    fontSize: '20px',
+    color: 'var(--primary-color)',
+    fontSize: '24px',
     cursor: 'pointer',
     padding: '0',
-    width: '24px',
-    height: '24px',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
@@ -289,53 +325,70 @@ const styles = {
   deleteBtn: {
     background: 'transparent',
     border: 'none',
-    color: '#ccc',
-    fontSize: '16px',
+    color: '#94a3b8',
     cursor: 'pointer',
-    padding: '0',
-    width: '24px',
-    height: '24px',
+    padding: '6px',
+    borderRadius: '8px',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    transition: 'color 0.2s ease',
+    transition: 'all 0.2s ease',
+    '&:hover': {
+      background: '#fee2e2',
+      color: '#ef4444',
+    },
   },
   emptyState: {
     textAlign: 'center',
-    padding: '60px 20px',
+    padding: '80px 24px',
+    background: 'white',
+    borderRadius: '20px',
+    boxShadow: 'var(--shadow)',
   },
-  emptyStateIcon: {
-    fontSize: '48px',
-    margin: '0 0 16px 0',
+  emptyIconWrapper: {
+    width: '80px',
+    height: '80px',
+    borderRadius: '50%',
+    background: 'var(--light-gray)',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    margin: '0 auto 24px',
+    color: '#cbd5e1',
   },
   emptyStateText: {
-    fontSize: '16px',
-    fontWeight: '600',
+    fontSize: '20px',
+    fontWeight: '800',
     margin: '0 0 8px 0',
+    color: 'var(--text-color)',
   },
   emptyStateSubtext: {
-    fontSize: '13px',
+    fontSize: '15px',
     color: 'var(--text-light)',
     margin: '0',
   },
   loadingState: {
     textAlign: 'center',
-    padding: '60px 20px',
+    padding: '100px 24px',
     color: 'var(--text-light)',
+    fontSize: '16px',
+    fontWeight: '600',
   },
   errorState: {
     textAlign: 'center',
-    padding: '60px 20px',
+    padding: '100px 24px',
     color: 'var(--danger-color)',
   },
   retryBtn: {
-    marginTop: '12px',
-    padding: '8px 16px',
-    background: 'var(--primary-color)',
+    marginTop: '16px',
+    padding: '12px 24px',
+    background: 'var(--danger-color)',
     color: 'white',
     border: 'none',
-    borderRadius: '4px',
+    borderRadius: '10px',
+    fontWeight: '700',
     cursor: 'pointer',
+    boxShadow: '0 4px 12px rgba(239, 68, 68, 0.2)',
   },
 };
 

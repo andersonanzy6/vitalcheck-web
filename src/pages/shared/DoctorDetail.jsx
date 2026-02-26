@@ -1,6 +1,19 @@
 import { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { patientAPI } from '../../services/apiClient';
+import {
+  ArrowLeft,
+  Star,
+  BookOpen,
+  CreditCard,
+  MapPin,
+  Phone,
+  MessageSquare,
+  Calendar,
+  Check,
+  ShieldCheck,
+  User
+} from 'lucide-react';
 
 export const DoctorDetailPage = () => {
   const { doctorId } = useParams();
@@ -74,16 +87,25 @@ export const DoctorDetailPage = () => {
       {/* Doctor Header */}
       <div style={styles.doctorHeader}>
         <div style={styles.avatar}>
-          {doctor.user?.name?.charAt(0).toUpperCase() || '?'}
+          {doctor.user?.profileImage ? (
+            <img src={doctor.user.profileImage} alt={doctor.user.name} style={styles.avatarImg} />
+          ) : (
+            <User size={40} />
+          )}
         </div>
         <h2 style={styles.name}>Dr. {doctor.user?.name || 'Unknown'}</h2>
         <p style={styles.specialization}>{doctor.specialization}</p>
         <div style={styles.ratingSection}>
-          <span style={styles.stars}>
+          <div style={styles.stars}>
             {[...Array(5)].map((_, i) => (
-              <span key={i}>{i < Math.round(doctor.rating || 0) ? '⭐' : '☆'}</span>
+              <Star
+                key={i}
+                size={16}
+                fill={i < Math.round(doctor.rating || 0) ? '#ffc107' : 'none'}
+                color={i < Math.round(doctor.rating || 0) ? '#ffc107' : 'white'}
+              />
             ))}
-          </span>
+          </div>
           <span style={styles.rating}>{doctor.rating ? `${doctor.rating.toFixed(1)} rating` : 'No ratings yet'}</span>
         </div>
       </div>
@@ -91,7 +113,7 @@ export const DoctorDetailPage = () => {
       {/* Doctor Info */}
       <div style={styles.infoSection}>
         <div style={styles.infoItem}>
-          <span style={styles.infoIcon}>📚</span>
+          <div style={styles.infoIconWrapper}><BookOpen size={20} className="icon-blue" /></div>
           <div>
             <p style={styles.infoLabel}>Experience</p>
             <p style={styles.infoValue}>
@@ -101,26 +123,26 @@ export const DoctorDetailPage = () => {
         </div>
 
         <div style={styles.infoItem}>
-          <span style={styles.infoIcon}>💰</span>
+          <div style={styles.infoIconWrapper}><CreditCard size={20} className="icon-blue" /></div>
           <div>
             <p style={styles.infoLabel}>Consultation Fee</p>
-            <p style={styles.infoValue}>{doctor.consultationFee ? `$${doctor.consultationFee}` : 'Contact for fee'}</p>
+            <p style={styles.infoValue}>{doctor.consultationFee ? `$${doctor.consultationFee}` : '$50 (Est.)'}</p>
           </div>
         </div>
 
         <div style={styles.infoItem}>
-          <span style={styles.infoIcon}>📍</span>
+          <div style={styles.infoIconWrapper}><MapPin size={20} className="icon-blue" /></div>
           <div>
             <p style={styles.infoLabel}>Location</p>
-            <p style={styles.infoValue}>{doctor.clinicAddress || 'Virtual / Online'}</p>
+            <p style={styles.infoValue}>{doctor.location || doctor.clinicAddress || 'Virtual / Online'}</p>
           </div>
         </div>
 
         <div style={styles.infoItem}>
-          <span style={styles.infoIcon}>📱</span>
+          <div style={styles.infoIconWrapper}><Phone size={20} className="icon-blue" /></div>
           <div>
             <p style={styles.infoLabel}>Contact</p>
-            <p style={styles.infoValue}>{doctor.phone || doctor.user?.email || 'Available via app'}</p>
+            <p style={styles.infoValue}>{doctor.phone || 'Available via app'}</p>
           </div>
         </div>
       </div>
@@ -133,14 +155,13 @@ export const DoctorDetailPage = () => {
         </div>
       )}
 
-      {/* Services Section */}
       <div style={styles.section}>
         <h3 style={styles.sectionTitle}>Services Offered</h3>
         <div style={styles.servicesList}>
-          <div style={styles.serviceItem}>✓ Online Consultation</div>
-          <div style={styles.serviceItem}>✓ Medical Records Review</div>
-          <div style={styles.serviceItem}>✓ Follow-up Appointments</div>
-          <div style={styles.serviceItem}>✓ Prescription Services</div>
+          <div style={styles.serviceItem}><Check size={16} className="icon-green" /> Online Consultation</div>
+          <div style={styles.serviceItem}><Check size={16} className="icon-green" /> Medical Records Review</div>
+          <div style={styles.serviceItem}><Check size={16} className="icon-green" /> Follow-up Appointments</div>
+          <div style={styles.serviceItem}><Check size={16} className="icon-green" /> Prescription Services</div>
         </div>
       </div>
 
@@ -165,13 +186,13 @@ export const DoctorDetailPage = () => {
           style={styles.messageBtn}
           onClick={() => navigate(`/shared/chat/${doctor.user?._id}`)}
         >
-          💬 Send Message
+          <MessageSquare size={18} /> Send Message
         </button>
         <button
           style={styles.bookBtn}
           onClick={() => navigate(`/patient/booking/${doctor._id}`)}
         >
-          📅 Book Appointment
+          <Calendar size={18} /> Book Appointment
         </button>
       </div>
     </div>
@@ -186,166 +207,219 @@ const styles = {
   backBtn: {
     background: 'transparent',
     border: 'none',
-    fontSize: '16px',
+    fontSize: '15px',
     fontWeight: '600',
-    color: 'var(--secondary-color)',
+    color: 'var(--text-light)',
     cursor: 'pointer',
     padding: '12px 0',
-    marginBottom: '12px',
+    marginBottom: '8px',
+    display: 'flex',
+    alignItems: 'center',
+    gap: '8px',
+    transition: 'color 0.2s ease',
   },
   doctorHeader: {
     background: 'var(--gradient)',
     color: 'white',
-    padding: '40px 20px',
-    borderRadius: '12px',
+    padding: '48px 24px',
+    borderRadius: '20px',
     textAlign: 'center',
-    marginBottom: '24px',
+    marginBottom: '32px',
+    position: 'relative',
+    overflow: 'hidden',
+    boxShadow: '0 10px 25px -5px rgba(0, 102, 204, 0.3)',
   },
   avatar: {
-    width: '80px',
-    height: '80px',
+    width: '100px',
+    height: '100px',
     borderRadius: '50%',
-    background: 'rgba(255, 255, 255, 0.3)',
+    background: 'rgba(255, 255, 255, 0.2)',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    fontSize: '32px',
-    fontWeight: '700',
-    margin: '0 auto 16px',
+    margin: '0 auto 20px',
+    border: '4px solid rgba(255, 255, 255, 0.3)',
+    overflow: 'hidden',
+  },
+  avatarImg: {
+    width: '100%',
+    height: '100%',
+    objectFit: 'cover',
   },
   name: {
-    fontSize: '22px',
-    fontWeight: '700',
+    fontSize: '28px',
+    fontWeight: '800',
     margin: '0 0 4px 0',
   },
   specialization: {
-    fontSize: '14px',
+    fontSize: '16px',
     opacity: '0.9',
-    margin: '0 0 12px 0',
+    margin: '0 0 16px 0',
+    fontWeight: '500',
   },
   ratingSection: {
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
-    gap: '4px',
+    gap: '8px',
   },
   stars: {
-    fontSize: '16px',
+    display: 'flex',
+    gap: '4px',
   },
   rating: {
-    fontSize: '12px',
+    fontSize: '13px',
     opacity: '0.8',
+    fontWeight: '600',
   },
   infoSection: {
     background: 'white',
-    border: '1px solid var(--border-color)',
-    borderRadius: '12px',
-    padding: '16px',
-    marginBottom: '20px',
+    borderRadius: '16px',
+    padding: '24px',
+    marginBottom: '24px',
     display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))',
-    gap: '16px',
+    gridTemplateColumns: 'repeat(2, 1fr)',
+    gap: '24px',
+    boxShadow: 'var(--shadow)',
   },
   infoItem: {
     display: 'flex',
-    gap: '12px',
+    gap: '16px',
+    alignItems: 'flex-start',
   },
-  infoIcon: {
-    fontSize: '20px',
+  infoIconWrapper: {
+    width: '40px',
+    height: '40px',
+    borderRadius: '10px',
+    background: 'var(--light-gray)',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexShrink: 0,
   },
   infoLabel: {
     fontSize: '12px',
     color: 'var(--text-light)',
     margin: '0 0 4px 0',
+    fontWeight: '600',
   },
   infoValue: {
-    fontSize: '13px',
-    fontWeight: '600',
+    fontSize: '15px',
+    fontWeight: '700',
     margin: '0',
     color: 'var(--text-color)',
   },
   section: {
     background: 'white',
-    border: '1px solid var(--border-color)',
-    borderRadius: '12px',
-    padding: '16px',
-    marginBottom: '16px',
+    borderRadius: '16px',
+    padding: '24px',
+    marginBottom: '24px',
+    boxShadow: 'var(--shadow)',
   },
   sectionTitle: {
-    fontSize: '15px',
-    fontWeight: '600',
-    margin: '0 0 12px 0',
+    fontSize: '18px',
+    fontWeight: '700',
+    margin: '0 0 16px 0',
     color: 'var(--text-color)',
+    display: 'flex',
+    alignItems: 'center',
+    gap: '10px',
   },
   bioText: {
-    fontSize: '13px',
-    lineHeight: '1.6',
+    fontSize: '15px',
+    lineHeight: '1.7',
     margin: '0',
-    color: 'var(--text-color)',
+    color: '#475569',
   },
   servicesList: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '8px',
+    display: 'grid',
+    gridTemplateColumns: 'repeat(2, 1fr)',
+    gap: '12px',
   },
   serviceItem: {
-    fontSize: '13px',
+    fontSize: '14px',
     color: 'var(--text-color)',
-    padding: '8px 0',
+    padding: '8px 12px',
+    background: 'var(--light-gray)',
+    borderRadius: '8px',
+    display: 'flex',
+    alignItems: 'center',
+    gap: '8px',
+    fontWeight: '500',
   },
   qualificationItem: {
+    padding: '12px 0',
     borderBottom: '1px solid var(--border-color)',
-    paddingBottom: '8px',
-    marginBottom: '8px',
+    '&:lastChild': {
+      borderBottom: 'none',
+    },
   },
   qualificationLabel: {
     fontSize: '12px',
     color: 'var(--text-light)',
     margin: '0 0 4px 0',
+    fontWeight: '600',
   },
   qualificationValue: {
-    fontSize: '13px',
-    fontWeight: '600',
+    fontSize: '14px',
+    fontWeight: '700',
     margin: '0',
   },
   actionButtons: {
     display: 'grid',
     gridTemplateColumns: '1fr 1fr',
-    gap: '12px',
-    marginBottom: '20px',
+    gap: '16px',
+    position: 'sticky',
+    bottom: '24px',
+    padding: '16px',
+    background: 'white',
+    borderRadius: '20px',
+    boxShadow: '0 -4px 20px rgba(0,0,0,0.05)',
   },
   messageBtn: {
     background: 'white',
-    border: '2px solid var(--secondary-color)',
-    color: 'var(--secondary-color)',
-    borderRadius: '8px',
-    padding: '12px',
-    fontWeight: '600',
+    border: '2px solid var(--primary-color)',
+    color: 'var(--primary-color)',
+    borderRadius: '12px',
+    padding: '14px',
+    fontWeight: '700',
     cursor: 'pointer',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: '10px',
+    transition: 'all 0.2s ease',
   },
   bookBtn: {
-    background: 'var(--secondary-color)',
+    background: 'var(--primary-color)',
     color: 'white',
     border: 'none',
-    borderRadius: '8px',
-    padding: '12px',
-    fontWeight: '600',
+    borderRadius: '12px',
+    padding: '14px',
+    fontWeight: '700',
     cursor: 'pointer',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: '10px',
+    transition: 'all 0.2s ease',
+    boxShadow: '0 4px 12px rgba(0, 102, 204, 0.2)',
   },
   errorBox: {
-    background: '#ffebee',
-    border: '1px solid #ef5350',
-    borderRadius: '8px',
-    padding: '16px',
+    background: '#fee2e2',
+    borderRadius: '16px',
+    padding: '24px',
     textAlign: 'center',
+    color: 'var(--danger-color)',
   },
   retryBtn: {
-    marginTop: '12px',
-    background: '#ef5350',
+    marginTop: '16px',
+    background: 'var(--danger-color)',
     color: 'white',
     border: 'none',
-    borderRadius: '6px',
-    padding: '8px 16px',
+    borderRadius: '8px',
+    padding: '10px 24px',
+    fontWeight: '600',
     cursor: 'pointer',
   },
 };

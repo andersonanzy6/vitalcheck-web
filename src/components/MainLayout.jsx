@@ -2,6 +2,21 @@ import React, { useState } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext.jsx'
 import { notificationAPI } from '../services/apiClient'
+import {
+  Home,
+  User,
+  Users,
+  Calendar,
+  MessageSquare,
+  Bell,
+  LogOut,
+  Menu,
+  MessageCircle,
+  Stethoscope,
+  ClipboardList,
+  Sparkles,
+  CreditCard
+} from 'lucide-react'
 import '../styles/main-layout.css'
 
 const MainLayout = ({ children }) => {
@@ -9,7 +24,6 @@ const MainLayout = ({ children }) => {
   const navigate = useNavigate()
   const location = useLocation()
   const [menuOpen, setMenuOpen] = useState(false)
-  const [notificationsOpen, setNotificationsOpen] = useState(false)
   const [unreadCount, setUnreadCount] = useState(0)
 
   const isPatient = user?.role === 'patient'
@@ -31,20 +45,22 @@ const MainLayout = ({ children }) => {
   }
 
   const patientTabs = [
-    { label: 'Home', icon: '🏠', path: '/patient/home' },
-    { label: 'Doctors', icon: '👨‍⚕️', path: '/patient/doctors' },
-    { label: 'Appointments', icon: '📅', path: '/patient/appointments' },
-    { label: 'Messages', icon: '💬', path: '/patient/messages' },
-    { label: 'Notifications', icon: '🔔', path: '/patient/notifications' },
-    { label: 'Profile', icon: '👤', path: '/patient/profile' },
+    { label: 'Home', icon: <Home size={22} />, path: '/patient/home' },
+    { label: 'Doctors', icon: <Stethoscope size={22} />, path: '/patient/doctors' },
+    { label: 'Symptom Checker', icon: <ClipboardList size={22} />, path: '/patient/symptom-checker' },
+    { label: 'Appointments', icon: <Calendar size={22} />, path: '/patient/appointments' },
+    { label: 'Messages', icon: <MessageSquare size={22} />, path: '/patient/messages' },
+    { label: 'Notifications', icon: <Bell size={22} />, path: '/patient/notifications' },
+    { label: 'Payments', icon: <CreditCard size={22} />, path: '/patient/payments' },
+    { label: 'Profile', icon: <User size={22} />, path: '/patient/profile' },
   ]
 
   const doctorTabs = [
-    { label: 'Home', icon: '🏠', path: '/doctor/home' },
-    { label: 'Appointments', icon: '📅', path: '/doctor/appointments' },
-    { label: 'Messages', icon: '💬', path: '/doctor/messages' },
-    { label: 'Notifications', icon: '🔔', path: '/doctor/notifications' },
-    { label: 'Profile', icon: '👤', path: '/doctor/profile' },
+    { label: 'Home', icon: <Home size={22} />, path: '/doctor/home' },
+    { label: 'Appointments', icon: <Calendar size={22} />, path: '/doctor/appointments' },
+    { label: 'Messages', icon: <MessageSquare size={22} />, path: '/doctor/messages' },
+    { label: 'Notifications', icon: <Bell size={22} />, path: '/doctor/notifications' },
+    { label: 'Profile', icon: <User size={22} />, path: '/doctor/profile' },
   ]
 
   const tabs = isPatient ? patientTabs : doctorTabs
@@ -72,14 +88,14 @@ const MainLayout = ({ children }) => {
                 setMenuOpen(false)
               }}
             >
-              🔔
+              <Bell size={24} />
               {unreadCount > 0 && <span className="badge">{unreadCount}</span>}
             </button>
             <button
               className="icon-btn menu-btn"
               onClick={() => setMenuOpen(!menuOpen)}
             >
-              ☰
+              <Menu size={24} />
             </button>
           </div>
         </div>
@@ -102,7 +118,7 @@ const MainLayout = ({ children }) => {
             ))}
             <hr className="menu-divider" />
             <button className="menu-item logout-btn" onClick={handleLogout}>
-              <span className="icon">🚪</span>
+              <span className="icon"><LogOut size={20} /></span>
               <span className="label">Logout</span>
             </button>
           </div>
@@ -142,6 +158,7 @@ const MainLayout = ({ children }) => {
                 </div>
               </div>
               <button className="logout-btn" onClick={handleLogout}>
+                <LogOut size={16} style={{ marginRight: '8px' }} />
                 Logout
               </button>
             </div>
@@ -151,23 +168,37 @@ const MainLayout = ({ children }) => {
         {/* Page Content */}
         <main className="page-content">
           {children}
+
+          {/* Floating AI Chat Button */}
+          {isPatient && location.pathname !== '/patient/symptom-checker' && (
+            <button
+              className="floating-ai-btn"
+              onClick={() => navigate('/patient/symptom-checker')}
+              title="AI Symptom Checker"
+            >
+              <Sparkles className="ai-sparkle" size={20} />
+              <MessageCircle size={24} />
+            </button>
+          )}
         </main>
       </div>
 
       {/* Mobile Bottom Navigation */}
       {isMobile && (
         <nav className="bottom-nav">
-          {tabs.map((tab) => (
-            <button
-              key={tab.path}
-              className={`nav-item ${isActive(tab.path) ? 'active' : ''}`}
-              onClick={() => navigate(tab.path)}
-              title={tab.label}
-            >
-              <span className="icon">{tab.icon}</span>
-              <span className="label">{tab.label}</span>
-            </button>
-          ))}
+          {tabs
+            .filter(tab => tab.label !== 'Symptom Checker' && tab.label !== 'Payments')
+            .map((tab) => (
+              <button
+                key={tab.path}
+                className={`nav-item ${isActive(tab.path) ? 'active' : ''}`}
+                onClick={() => navigate(tab.path)}
+                title={tab.label}
+              >
+                <span className="icon">{tab.icon}</span>
+                <span className="label">{tab.label}</span>
+              </button>
+            ))}
         </nav>
       )}
     </div>

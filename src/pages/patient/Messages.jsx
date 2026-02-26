@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext.jsx';
 import { chatAPI } from '../../services/apiClient';
+import { Search, MessageSquare, Clock, User, ChevronRight } from 'lucide-react';
 
 export const MessagesPage = () => {
   const navigate = useNavigate();
@@ -70,7 +71,7 @@ export const MessagesPage = () => {
 
       {/* Search Bar */}
       <div style={styles.searchBox}>
-        <span style={styles.searchIcon}>🔍</span>
+        <Search size={18} style={styles.searchIcon} />
         <input
           type="text"
           placeholder="Search conversations..."
@@ -87,8 +88,8 @@ export const MessagesPage = () => {
             const otherParticipant = conversation.partner;
             const lastMessage = conversation.lastMessage;
             const isUnread = conversation.unreadCount > 0;
-            const lastMessagePreview = lastMessage?.message ? 
-              (lastMessage.sender?._id === user?._id ? `You: ${lastMessage.message}` : lastMessage.message) 
+            const lastMessagePreview = lastMessage?.message ?
+              (lastMessage.sender?._id === user?._id ? `You: ${lastMessage.message}` : lastMessage.message)
               : 'No messages yet';
 
             return (

@@ -24,7 +24,9 @@ const PrivateRoute = ({ children, requiredRole = null }) => {
   }
 
   if (requiredRole && user?.role !== requiredRole) {
-    return <Navigate to="/home" replace />
+    if (user?.role === 'patient') return <Navigate to="/patient/home" replace />
+    if (user?.role === 'doctor') return <Navigate to="/doctor/home" replace />
+    return <Navigate to="/login" replace />
   }
 
   return children

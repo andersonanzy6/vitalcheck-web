@@ -1,7 +1,18 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext.jsx';
 import { doctorAPI } from '../../services/apiClient';
+import {
+  LayoutDashboard,
+  Calendar,
+  MessageSquare,
+  Bell,
+  User,
+  Clock,
+  CheckCircle,
+  ClipboardList,
+  ChevronRight
+} from 'lucide-react';
 
 export const DoctorHome = () => {
   const navigate = useNavigate();
@@ -70,23 +81,28 @@ export const DoctorHome = () => {
   return (
     <div style={styles.container}>
       {/* Welcome Section */}
-      <div style={styles.welcomeSection}>
-        <h2 style={styles.greeting}>Welcome, Dr. {user?.name?.split(' ').slice(-1)[0]} 👨‍⚕️</h2>
-        <p style={styles.subtitle}>Manage your appointments and patient interactions</p>
+      <div style={styles.heroSection}>
+        <div style={styles.heroContent}>
+          <h2 style={styles.greeting}>Welcome, Dr. {user?.name?.split(' ').slice(-1)[0]}! 👋</h2>
+          <p style={styles.subtitle}>You have {stats.todayAppointments} appointments scheduled for today.</p>
+        </div>
+        <div style={styles.heroIllustration}>
+          <User size={100} color="rgba(255,255,255,0.2)" />
+        </div>
       </div>
 
       {/* Stats Cards */}
       <div style={styles.statsGrid}>
         <div style={styles.statCard}>
-          <div style={styles.statIcon}>📋</div>
+          <div style={styles.statIconWrapper}><ClipboardList className="icon-blue" /></div>
           <div style={styles.statContent}>
-            <p style={styles.statLabel}>Total Appointments</p>
+            <p style={styles.statLabel}>Total Visits</p>
             <p style={styles.statValue}>{stats.totalAppointments}</p>
           </div>
         </div>
 
         <div style={styles.statCard}>
-          <div style={styles.statIcon}>📅</div>
+          <div style={styles.statIconWrapper}><Calendar className="icon-blue" /></div>
           <div style={styles.statContent}>
             <p style={styles.statLabel}>Today</p>
             <p style={styles.statValue}>{stats.todayAppointments}</p>
@@ -94,7 +110,7 @@ export const DoctorHome = () => {
         </div>
 
         <div style={styles.statCard}>
-          <div style={styles.statIcon}>⏳</div>
+          <div style={styles.statIconWrapper}><Clock className="icon-orange" /></div>
           <div style={styles.statContent}>
             <p style={styles.statLabel}>Pending</p>
             <p style={styles.statValue}>{stats.pendingAppointments}</p>
@@ -102,7 +118,7 @@ export const DoctorHome = () => {
         </div>
 
         <div style={styles.statCard}>
-          <div style={styles.statIcon}>✅</div>
+          <div style={styles.statIconWrapper}><CheckCircle className="icon-green" /></div>
           <div style={styles.statContent}>
             <p style={styles.statLabel}>Completed</p>
             <p style={styles.statValue}>{stats.completedAppointments}</p>
@@ -110,7 +126,6 @@ export const DoctorHome = () => {
         </div>
       </div>
 
-      {/* Quick Actions */}
       <div style={styles.section}>
         <h3 style={styles.sectionTitle}>Quick Actions</h3>
         <div style={styles.actionGrid}>
@@ -118,28 +133,28 @@ export const DoctorHome = () => {
             style={styles.actionButton}
             onClick={() => navigate('/doctor/appointments')}
           >
-            <span style={styles.actionIcon}>📅</span>
-            <span>View Appointments</span>
+            <div style={styles.actionIconWrapper}><Calendar size={28} /></div>
+            <span>Appointments</span>
           </button>
           <button
             style={styles.actionButton}
             onClick={() => navigate('/doctor/messages')}
           >
-            <span style={styles.actionIcon}>💬</span>
+            <div style={styles.actionIconWrapper}><MessageSquare size={28} /></div>
             <span>Messages</span>
           </button>
           <button
             style={styles.actionButton}
             onClick={() => navigate('/doctor/profile')}
           >
-            <span style={styles.actionIcon}>👤</span>
+            <div style={styles.actionIconWrapper}><User size={28} /></div>
             <span>My Profile</span>
           </button>
           <button
             style={styles.actionButton}
             onClick={() => navigate('/doctor/notifications')}
           >
-            <span style={styles.actionIcon}>🔔</span>
+            <div style={styles.actionIconWrapper}><Bell size={28} /></div>
             <span>Notifications</span>
           </button>
         </div>
@@ -154,7 +169,7 @@ export const DoctorHome = () => {
               style={styles.viewAllLink}
               onClick={() => navigate('/doctor/appointments')}
             >
-              View All →
+              View All <ChevronRight size={14} />
             </button>
           </div>
           <div style={styles.appointmentsList}>
@@ -227,137 +242,161 @@ const styles = {
     flex: 1,
     overflowY: 'auto',
   },
-  welcomeSection: {
+  heroSection: {
     background: 'var(--gradient)',
     color: 'white',
-    padding: '24px 16px',
-    borderRadius: '12px',
-    marginBottom: '20px',
+    padding: '40px 32px',
+    borderRadius: '16px',
+    marginBottom: '24px',
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    position: 'relative',
+    overflow: 'hidden',
+    boxShadow: '0 10px 25px -5px rgba(0, 102, 204, 0.3)',
+  },
+  heroContent: {
+    zIndex: 1,
+    flex: 1,
+  },
+  heroIllustration: {
+    flex: '0 0 150px',
+    display: 'flex',
+    justifyContent: 'center',
+    opacity: 0.6,
   },
   greeting: {
-    fontSize: '24px',
-    fontWeight: '700',
+    fontSize: '28px',
+    fontWeight: '800',
     margin: '0 0 8px 0',
   },
   subtitle: {
-    fontSize: '14px',
+    fontSize: '16px',
     opacity: '0.9',
     margin: '0',
   },
   statsGrid: {
     display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fit, minmax(80px, 1fr))',
-    gap: '12px',
+    gridTemplateColumns: 'repeat(4, 1fr)',
+    gap: '20px',
     marginBottom: '24px',
   },
   statCard: {
     background: 'white',
-    border: '1px solid var(--border-color)',
-    borderRadius: '12px',
-    padding: '16px',
-    textAlign: 'center',
-    boxShadow: '0 1px 3px rgba(0, 0, 0, 0.05)',
+    borderRadius: '16px',
+    padding: '20px',
+    display: 'flex',
+    alignItems: 'center',
+    gap: '16px',
+    boxShadow: 'var(--shadow)',
   },
-  statIcon: {
-    fontSize: '28px',
-    marginBottom: '8px',
+  statIconWrapper: {
+    width: '40px',
+    height: '40px',
+    borderRadius: '10px',
+    background: 'var(--light-gray)',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
-  statContent: {},
   statLabel: {
-    fontSize: '11px',
+    fontSize: '12px',
     color: 'var(--text-light)',
-    margin: '0 0 4px 0',
+    fontWeight: '600',
+    margin: '0',
   },
   statValue: {
-    fontSize: '20px',
+    fontSize: '18px',
     fontWeight: '700',
-    color: 'var(--secondary-color)',
+    color: 'var(--text-color)',
     margin: '0',
   },
   section: {
-    marginBottom: '24px',
+    marginBottom: '32px',
   },
   sectionHeader: {
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: '12px',
+    marginBottom: '16px',
   },
   sectionTitle: {
-    fontSize: '16px',
-    fontWeight: '600',
+    fontSize: '18px',
+    fontWeight: '700',
     margin: '0',
     color: 'var(--text-color)',
   },
   viewAllLink: {
     background: 'none',
     border: 'none',
-    color: 'var(--secondary-color)',
-    fontSize: '12px',
+    color: 'var(--primary-color)',
+    fontSize: '13px',
     fontWeight: '600',
     cursor: 'pointer',
-    padding: '0',
+    display: 'flex',
+    alignItems: 'center',
+    gap: '4px',
   },
   actionGrid: {
     display: 'grid',
-    gridTemplateColumns: 'repeat(2, 1fr)',
-    gap: '12px',
+    gridTemplateColumns: 'repeat(4, 1fr)',
+    gap: '16px',
   },
   actionButton: {
     background: 'white',
-    border: '1px solid var(--border-color)',
-    borderRadius: '12px',
-    padding: '16px',
+    border: 'none',
+    borderRadius: '16px',
+    padding: '24px 16px',
     textAlign: 'center',
     cursor: 'pointer',
-    transition: 'all 0.3s ease',
+    transition: 'all 0.2s ease',
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
-    gap: '8px',
-    fontSize: '12px',
-    fontWeight: '500',
+    gap: '12px',
+    boxShadow: 'var(--shadow)',
     color: 'var(--text-color)',
+    fontWeight: '600',
   },
-  actionIcon: {
-    fontSize: '28px',
+  actionIconWrapper: {
+    color: 'var(--primary-color)',
   },
   appointmentsList: {
     display: 'flex',
     flexDirection: 'column',
-    gap: '8px',
+    gap: '16px',
   },
   appointmentItem: {
     background: 'white',
-    border: '1px solid var(--border-color)',
-    borderRadius: '12px',
-    padding: '12px',
+    borderRadius: '16px',
+    padding: '16px',
     display: 'flex',
     alignItems: 'center',
-    gap: '12px',
+    gap: '16px',
     cursor: 'pointer',
     transition: 'all 0.2s ease',
+    boxShadow: 'var(--shadow)',
   },
   appointmentTime: {
     textAlign: 'center',
-    minWidth: '50px',
-    padding: '8px',
-    background: 'var(--light-gray)',
-    borderRadius: '8px',
+    minWidth: '60px',
+    padding: '10px',
+    background: 'rgba(0, 102, 204, 0.05)',
+    borderRadius: '12px',
   },
   time: {
     fontSize: '14px',
-    fontWeight: '700',
+    fontWeight: '800',
     margin: '0',
-    color: 'var(--secondary-color)',
+    color: 'var(--primary-color)',
   },
   appointmentInfo: {
     flex: 1,
   },
   patientName: {
-    fontSize: '14px',
-    fontWeight: '600',
-    margin: '0 0 4px 0',
+    fontSize: '15px',
+    fontWeight: '700',
+    margin: '0 0 2px 0',
   },
   appointmentType: {
     fontSize: '12px',
@@ -365,28 +404,26 @@ const styles = {
     margin: '0',
   },
   statusBadge: {
-    padding: '4px 12px',
+    padding: '6px 14px',
     borderRadius: '20px',
-    fontSize: '11px',
-    fontWeight: '600',
+    fontSize: '12px',
+    fontWeight: '700',
     textTransform: 'capitalize',
   },
   errorBox: {
-    background: '#ffebee',
-    border: '1px solid #ef5350',
-    borderRadius: '8px',
-    padding: '16px',
-    marginTop: '20px',
+    background: '#fee2e2',
+    borderRadius: '12px',
+    padding: '20px',
     textAlign: 'center',
   },
   retryBtn: {
     marginTop: '12px',
-    background: '#ef5350',
+    background: 'var(--danger-color)',
     color: 'white',
     border: 'none',
-    borderRadius: '6px',
-    padding: '8px 16px',
-    cursor: 'pointer',
+    borderRadius: '8px',
+    padding: '10px 20px',
+    fontWeight: '600',
   },
 };
 

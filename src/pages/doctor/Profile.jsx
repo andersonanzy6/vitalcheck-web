@@ -2,6 +2,22 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext.jsx';
 import { doctorAPI } from '../../services/apiClient';
+import {
+  User,
+  Mail,
+  Phone,
+  MapPin,
+  Calendar,
+  Briefcase,
+  Award,
+  FileText,
+  DollarSign,
+  Edit3,
+  LogOut,
+  Camera,
+  Check,
+  ChevronRight
+} from 'lucide-react';
 
 export const DoctorProfilePage = () => {
   const navigate = useNavigate();
@@ -174,7 +190,7 @@ export const DoctorProfilePage = () => {
       {/* Edit Button */}
       {!isEditing && (
         <button style={styles.editBtn} onClick={() => setIsEditing(true)}>
-          ✏️ Edit Profile
+          <Edit3 size={16} /> Edit Profile
         </button>
       )}
 
@@ -398,7 +414,7 @@ export const DoctorProfilePage = () => {
       <div style={styles.accountSection}>
         <h3 style={styles.sectionTitle}>Account</h3>
         <button style={styles.logoutBtn} onClick={handleLogout}>
-          🚪 Logout
+          <LogOut size={16} /> Logout
         </button>
       </div>
     </div>
@@ -473,15 +489,20 @@ const styles = {
   },
   editBtn: {
     width: '100%',
-    background: 'var(--secondary-color)',
+    background: 'var(--primary-color)',
     color: 'white',
     border: 'none',
-    borderRadius: '8px',
+    borderRadius: '12px',
     padding: '12px',
     fontSize: '14px',
-    fontWeight: '600',
+    fontWeight: '700',
     cursor: 'pointer',
     marginBottom: '24px',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: '8px',
+    boxShadow: '0 4px 12px rgba(0, 102, 204, 0.2)',
   },
   formSection: {
     background: 'white',
@@ -553,13 +574,18 @@ const styles = {
   },
   logoutBtn: {
     width: '100%',
-    background: '#ffebee',
-    color: '#d32f2f',
-    border: '1px solid #d32f2f',
-    borderRadius: '8px',
+    background: 'rgba(239, 68, 68, 0.05)',
+    color: 'var(--danger-color)',
+    border: '1px solid var(--danger-color)',
+    borderRadius: '12px',
     padding: '12px',
-    fontWeight: '600',
+    fontWeight: '700',
     cursor: 'pointer',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: '8px',
+    transition: 'all 0.2s ease',
   },
 };
 

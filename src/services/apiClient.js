@@ -111,6 +111,12 @@ export const chatAPI = {
     apiClient.patch(`/chat/read/${userId}`),
 }
 
+// AI endpoints
+export const aiAPI = {
+  getDischargeSummary: (conversationId) => apiClient.get(`/ai-chat/${conversationId}/summary`),
+  symptomCheck: (messages) => apiClient.post('/ai-chat/symptom-check', { messages }),
+}
+
 // Notification endpoints
 export const notificationAPI = {
   getNotifications: () =>
@@ -123,6 +129,16 @@ export const notificationAPI = {
     apiClient.patch('/notifications/mark-all-read'),
   deleteNotification: (id) =>
     apiClient.delete(`/notifications/${id}`),
+}
+
+// Payment endpoints
+export const paymentAPI = {
+  getHistory: (params) => apiClient.get('/payments/history', { params }),
+  getReceipt: (paymentId) => apiClient.get(`/payments/receipt/${paymentId}`),
+  initiate: (data) => apiClient.post('/payments/initiate', data),
+  verifyFlutterwave: (data) => apiClient.post('/payments/verify/flutterwave', data),
+  verifyPayPal: (data) => apiClient.post('/payments/verify/paypal', data),
+  uploadProof: (paymentId, data) => apiClient.post(`/payments/bank-transfer/upload-proof/${paymentId}`, data),
 }
 
 export default apiClient

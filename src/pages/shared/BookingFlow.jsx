@@ -1,6 +1,18 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { patientAPI } from '../../services/apiClient';
+import {
+  Calendar,
+  Clock,
+  FileText,
+  CreditCard,
+  CheckCircle2,
+  ArrowLeft,
+  ArrowRight,
+  ShieldCheck,
+  AlertCircle,
+  Activity
+} from 'lucide-react';
 
 export const BookingFlowPage = () => {
   const { doctorId } = useParams();
@@ -8,6 +20,8 @@ export const BookingFlowPage = () => {
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [doctor, setDoctor] = useState(null);
+  const [paymentMethod, setPaymentMethod] = useState('card');
   const [formData, setFormData] = useState({
     doctorId: doctorId || '',
     appointmentDate: '',
@@ -15,6 +29,18 @@ export const BookingFlowPage = () => {
     notes: '',
     symptoms: '',
   });
+
+  useEffect(() => {
+    const fetchDoctor = async () => {
+      try {
+        const res = await patientAPI.getDoctorDetails(doctorId);
+        setDoctor(res.data);
+      } catch (err) {
+        console.error("Failed to fetch doctor:", err);
+      }
+    };
+    if (doctorId) fetchDoctor();
+  }, [doctorId]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -34,6 +60,11 @@ export const BookingFlowPage = () => {
     try {
       setLoading(true);
       setError(null);
+
+      // Simulate Payment Verification
+      // In a real app, we would initiate Stripe/Paypal here
+      console.log("Processing payment via", paymentMethod);
+
       const dateObj = new Date(formData.appointmentDate);
       const appointmentTime = dateObj.toLocaleTimeString('en-US', {
         hour: '2-digit',
@@ -47,11 +78,11 @@ export const BookingFlowPage = () => {
         appointmentTime: appointmentTime,
         consultationType: formData.consultationType,
         reasonForVisit: `Symptoms: ${formData.symptoms}. Notes: ${formData.notes}`,
+        paymentStatus: 'paid', // Enforce paid status
+        amount: doctor?.consultationFee || 50,
       });
 
-      // Show success message
-      alert('Appointment booked successfully!');
-      navigate('/patient/appointments');
+      setStep(4); // Success step
     } catch (err) {
       console.error('Error booking appointment:', err);
       setError(err.response?.data?.message || 'Failed to book appointment');
@@ -151,119 +182,145 @@ export const BookingFlowPage = () => {
         </div>
       )}
 
-      {/* Step 3: Review & Confirm */}
+      {/* Step 3: Payment */}
       {step === 3 && (
         <div style={styles.stepContent}>
-          <h3 style={styles.stepTitle}>Review Your Booking</h3>
-
-          <div style={styles.reviewSection}>
-            <div style={styles.reviewItem}>
-              <p style={styles.reviewLabel}>Date & Time</p>
-              <p style={styles.reviewValue}>
-                {new Date(formData.appointmentDate).toLocaleDateString('en-US', {
-                  weekday: 'long',
-                  month: 'long',
-                  day: 'numeric',
-                })} at {new Date(formData.appointmentDate).toLocaleTimeString('en-US', {
-                  hour: '2-digit',
-                  minute: '2-digit',
-                })}
-              </p>
+          <h3 style={styles.stepTitle}>Secure Payment</h3>
+          <div style={styles.paymentCard}>
+            <div style={styles.summaryBox}>
+              <div style={styles.summaryRow}>
+                <span>Consultation Fee</span>
+                <span style={styles.amount}>${doctor?.consultationFee || 50}</span>
+              </div>
+              <div style={styles.summaryRow}>
+                <span>Service Fee</span>
+                <span>$2.00</span>
+              </div>
+              <div style={{ ...styles.summaryRow, borderTop: '1px dashed #cbd5e1', paddingTop: '12px', marginTop: '12px' }}>
+                <span style={{ fontWeight: '800' }}>Total</span>
+                <span style={{ fontWeight: '800', fontSize: '20px', color: 'var(--primary-color)' }}>
+                  ${(doctor?.consultationFee || 50) + 2}
+                </span>
+              </div>
             </div>
 
-            <div style={styles.reviewItem}>
-              <p style={styles.reviewLabel}>Consultation Type</p>
-              <p style={styles.reviewValue}>{formData.consultationType}</p>
+            <div style={styles.paymentMethods}>
+              <label style={{ ...styles.paymentOption, ...(paymentMethod === 'card' ? styles.paymentOptionActive : {}) }}>
+                <input
+                  type="radio"
+                  name="payment"
+                  checked={paymentMethod === 'card'}
+                  onChange={() => setPaymentMethod('card')}
+                  style={{ display: 'none' }}
+                />
+                <CreditCard size={20} />
+                <span>Credit / Debit Card</span>
+              </label>
+              <label style={{ ...styles.paymentOption, ...(paymentMethod === 'paypal' ? styles.paymentOptionActive : {}) }}>
+                <input
+                  type="radio"
+                  name="payment"
+                  checked={paymentMethod === 'paypal'}
+                  onChange={() => setPaymentMethod('paypal')}
+                  style={{ display: 'none' }}
+                />
+                <Activity size={20} />
+                <span>PayPal</span>
+              </label>
             </div>
 
-            {formData.symptoms && (
-              <div style={styles.reviewItem}>
-                <p style={styles.reviewLabel}>Symptoms</p>
-                <p style={styles.reviewValue}>{formData.symptoms}</p>
-              </div>
-            )}
-
-            {formData.notes && (
-              <div style={styles.reviewItem}>
-                <p style={styles.reviewLabel}>Notes</p>
-                <p style={styles.reviewValue}>{formData.notes}</p>
-              </div>
-            )}
-          </div>
-
-          <div style={styles.infoBox}>
-            <p style={styles.infoText}>
-              The doctor will review your information and confirm the appointment. You will receive a notification once they confirm.
+            <p style={styles.securityNote}>
+              <ShieldCheck size={14} /> Your payment is secured and encrypted.
             </p>
           </div>
         </div>
       )}
 
-      {/* Navigation Buttons */}
-      <div style={styles.navButtons}>
-        <button
-          style={styles.prevBtn}
-          onClick={() => setStep(step - 1)}
-          disabled={step === 1}
-        >
-          ← Previous
-        </button>
+      {/* Step 4: Success */}
+      {step === 4 && (
+        <div style={{ ...styles.stepContent, textAlign: 'center', padding: '60px 24px' }}>
+          <div style={styles.successIcon}><CheckCircle2 size={64} color="var(--success-color)" /></div>
+          <h3 style={{ ...styles.stepTitle, marginBottom: '12px' }}>Booking Confirmed!</h3>
+          <p style={styles.successText}>
+            Your appointment with Dr. {doctor?.user?.name} has been successfully scheduled and paid for.
+          </p>
+          <button style={styles.finishBtn} onClick={() => navigate('/patient/appointments')}>
+            View My Appointments
+          </button>
+        </div>
+      )}
 
-        {step < 3 ? (
+      {/* Navigation Buttons */}
+      {step < 4 && (
+        <div style={styles.navButtons}>
           <button
-            style={styles.nextBtn}
-            onClick={() => setStep(step + 1)}
+            style={styles.prevBtn}
+            onClick={() => setStep(step - 1)}
+            disabled={step === 1 || loading}
           >
-            Next →
+            <ArrowLeft size={18} /> Back
           </button>
-        ) : (
-          <button
-            style={styles.confirmBtn}
-            onClick={handleBooking}
-            disabled={loading}
-          >
-            {loading ? 'Booking...' : 'Confirm Booking'}
-          </button>
-        )}
-      </div>
+
+          {step < 3 ? (
+            <button
+              style={styles.nextBtn}
+              onClick={() => setStep(step + 1)}
+            >
+              Continue <ArrowRight size={18} />
+            </button>
+          ) : (
+            <button
+              style={styles.confirmBtn}
+              onClick={handleBooking}
+              disabled={loading}
+            >
+              {loading ? 'Processing...' : `Pay & Book Now`}
+            </button>
+          )}
+        </div>
+      )}
     </div>
   );
 };
 
 const styles = {
   container: {
-    flex: 1,
-    overflowY: 'auto',
+    padding: '24px 16px',
     maxWidth: '600px',
     margin: '0 auto',
+    paddingBottom: '80px',
   },
   backBtn: {
     background: 'transparent',
     border: 'none',
-    fontSize: '16px',
+    fontSize: '14px',
     fontWeight: '600',
-    color: 'var(--secondary-color)',
+    color: 'var(--text-light)',
     cursor: 'pointer',
-    padding: '12px 0',
-    marginBottom: '16px',
+    display: 'flex',
+    alignItems: 'center',
+    gap: '8px',
+    marginBottom: '20px',
   },
   title: {
-    fontSize: '24px',
-    fontWeight: '700',
-    margin: '0 0 24px 0',
+    fontSize: '28px',
+    fontWeight: '800',
+    margin: '0 0 32px 0',
+    color: 'var(--text-color)',
+    textAlign: 'center',
   },
   progressBar: {
     display: 'flex',
     justifyContent: 'center',
     alignItems: 'center',
     gap: '12px',
-    marginBottom: '32px',
+    marginBottom: '40px',
   },
   progressStep: {
-    width: '40px',
-    height: '40px',
-    borderRadius: '50%',
-    background: 'var(--light-gray)',
+    width: '36px',
+    height: '36px',
+    borderRadius: '12px',
+    background: 'white',
     border: '2px solid var(--border-color)',
     display: 'flex',
     alignItems: 'center',
@@ -271,46 +328,50 @@ const styles = {
     fontSize: '14px',
     fontWeight: '700',
     color: 'var(--text-light)',
-    transition: 'all 0.3s ease',
+    transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
   },
   progressStepActive: {
-    background: 'var(--secondary-color)',
+    background: 'var(--primary-color)',
     color: 'white',
-    borderColor: 'var(--secondary-color)',
+    borderColor: 'var(--primary-color)',
+    transform: 'scale(1.1)',
+    boxShadow: '0 4px 12px rgba(0, 102, 204, 0.2)',
   },
   progressLine: {
     width: '40px',
     height: '2px',
     background: 'var(--border-color)',
-    transition: 'background 0.3s ease',
   },
   progressLineActive: {
-    background: 'var(--secondary-color)',
+    background: 'var(--primary-color)',
   },
   errorBox: {
-    background: '#ffebee',
-    border: '1px solid #ef5350',
-    borderRadius: '8px',
-    padding: '12px 16px',
-    marginBottom: '16px',
-    color: '#d32f2f',
-    fontSize: '13px',
+    background: '#fee2e2',
+    borderRadius: '12px',
+    padding: '16px',
+    marginBottom: '24px',
+    display: 'flex',
+    alignItems: 'center',
+    gap: '10px',
+    color: '#b91c1c',
+    fontSize: '14px',
+    fontWeight: '500',
   },
   stepContent: {
     background: 'white',
-    border: '1px solid var(--border-color)',
-    borderRadius: '12px',
-    padding: '24px',
-    marginBottom: '20px',
+    borderRadius: '20px',
+    padding: '32px',
+    marginBottom: '24px',
+    boxShadow: 'var(--shadow)',
   },
   stepTitle: {
-    fontSize: '18px',
-    fontWeight: '600',
-    margin: '0 0 20px 0',
+    fontSize: '20px',
+    fontWeight: '700',
+    margin: '0 0 24px 0',
     color: 'var(--text-color)',
   },
   formGroup: {
-    marginBottom: '16px',
+    marginBottom: '20px',
   },
   label: {
     display: 'block',
@@ -321,81 +382,122 @@ const styles = {
   },
   input: {
     width: '100%',
-    padding: '10px 12px',
+    padding: '12px 16px',
     border: '1px solid var(--border-color)',
-    borderRadius: '8px',
+    borderRadius: '12px',
     fontSize: '14px',
-    fontFamily: 'inherit',
-    boxSizing: 'border-box',
-  },
-  reviewSection: {
     background: 'var(--light-gray)',
-    borderRadius: '8px',
-    padding: '16px',
-    marginBottom: '16px',
+    transition: 'border-color 0.2s ease',
+    outline: 'none',
   },
-  reviewItem: {
-    paddingBottom: '12px',
+  summaryBox: {
+    background: 'var(--light-gray)',
+    borderRadius: '16px',
+    padding: '20px',
+    marginBottom: '24px',
   },
-  reviewLabel: {
-    fontSize: '12px',
-    fontWeight: '600',
-    color: 'var(--text-light)',
-    margin: '0 0 4px 0',
-  },
-  reviewValue: {
+  summaryRow: {
+    display: 'flex',
+    justifyContent: 'space-between',
     fontSize: '14px',
+    color: 'var(--text-light)',
+    marginBottom: '8px',
+  },
+  amount: {
+    fontWeight: '600',
     color: 'var(--text-color)',
-    fontWeight: '500',
-    margin: '0',
   },
-  infoBox: {
-    background: '#e3f2fd',
-    borderRadius: '8px',
+  paymentMethods: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '12px',
+  },
+  paymentOption: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '12px',
     padding: '16px',
-    borderLeft: '4px solid #1976d2',
+    borderRadius: '12px',
+    border: '1px solid var(--border-color)',
+    cursor: 'pointer',
+    transition: 'all 0.2s ease',
+    fontSize: '14px',
+    fontWeight: '600',
   },
-  infoText: {
-    fontSize: '13px',
-    color: '#1565c0',
-    margin: '0',
-    lineHeight: '1.5',
+  paymentOptionActive: {
+    borderColor: 'var(--primary-color)',
+    background: 'rgba(0, 102, 204, 0.05)',
+    color: 'var(--primary-color)',
+  },
+  securityNote: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: '6px',
+    fontSize: '12px',
+    color: 'var(--text-light)',
+    marginTop: '24px',
+  },
+  successIcon: {
+    marginBottom: '24px',
+  },
+  successText: {
+    fontSize: '15px',
+    color: 'var(--text-light)',
+    lineHeight: '1.6',
+    marginBottom: '32px',
+  },
+  finishBtn: {
+    width: '100%',
+    padding: '14px',
+    background: 'var(--primary-color)',
+    color: 'white',
+    border: 'none',
+    borderRadius: '12px',
+    fontWeight: '700',
+    cursor: 'pointer',
   },
   navButtons: {
     display: 'flex',
-    gap: '12px',
-    marginBottom: '20px',
+    gap: '16px',
   },
   prevBtn: {
     flex: 1,
-    padding: '12px',
+    padding: '14px',
     background: 'white',
     border: '1px solid var(--border-color)',
-    borderRadius: '8px',
-    fontWeight: '600',
+    borderRadius: '12px',
+    fontWeight: '700',
     cursor: 'pointer',
-    transition: 'all 0.2s ease',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: '8px',
   },
   nextBtn: {
     flex: 1,
-    padding: '12px',
-    background: 'var(--light-gray)',
-    border: '1px solid var(--border-color)',
-    borderRadius: '8px',
-    fontWeight: '600',
+    padding: '14px',
+    background: 'var(--primary-color)',
+    color: 'white',
+    border: 'none',
+    borderRadius: '12px',
+    fontWeight: '700',
     cursor: 'pointer',
-    transition: 'all 0.2s ease',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: '8px',
   },
   confirmBtn: {
     flex: 1,
-    padding: '12px',
-    background: 'var(--secondary-color)',
+    padding: '14px',
+    background: 'var(--success-color)',
     color: 'white',
     border: 'none',
-    borderRadius: '8px',
-    fontWeight: '600',
+    borderRadius: '12px',
+    fontWeight: '700',
     cursor: 'pointer',
-    transition: 'all 0.2s ease',
+    transition: 'transform 0.2s ease',
   },
 };
 

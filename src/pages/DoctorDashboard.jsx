@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext.jsx'
 import { doctorAPI } from '../services/apiClient'
+import { Calendar, Clock, CheckCircle, XCircle, ChevronRight } from 'lucide-react'
 import Header from '../components/Header'
 import Sidebar from '../components/Sidebar'
 import '../styles/dashboard.css'
@@ -23,7 +24,7 @@ const DoctorDashboard = () => {
       setLoading(true)
       const response = await doctorAPI.getAppointments()
       const appointments = response.data
-      
+
       // Calculate stats from appointments
       const stats = {
         totalAppointments: appointments.length,
@@ -31,7 +32,7 @@ const DoctorDashboard = () => {
         completedAppointments: appointments.filter(a => a.status === 'completed').length,
         cancelledAppointments: appointments.filter(a => a.status === 'cancelled').length,
       }
-      
+
       setAppointmentStats(stats)
       setRecentAppointments(appointments.slice(-5).reverse())
     } catch (err) {
@@ -52,7 +53,7 @@ const DoctorDashboard = () => {
       <Sidebar userRole="doctor" onLogout={handleLogout} />
       <div className="dashboard-content">
         <Header title="Doctor Dashboard" user={user} />
-        
+
         <div className="dashboard-main">
           {loading ? (
             <div className="loading">Loading dashboard...</div>
@@ -61,25 +62,25 @@ const DoctorDashboard = () => {
           ) : (
             <>
               <div className="stats-grid">
-                <StatCard 
+                <StatCard
                   title="Total Appointments"
                   value={appointmentStats?.totalAppointments || 0}
-                  icon="📅"
+                  icon={<Calendar size={24} />}
                 />
-                <StatCard 
+                <StatCard
                   title="Pending"
                   value={appointmentStats?.pendingAppointments || 0}
-                  icon="⏳"
+                  icon={<Clock size={24} />}
                 />
-                <StatCard 
+                <StatCard
                   title="Completed"
                   value={appointmentStats?.completedAppointments || 0}
-                  icon="✓"
+                  icon={<CheckCircle size={24} />}
                 />
-                <StatCard 
+                <StatCard
                   title="Cancelled"
                   value={appointmentStats?.cancelledAppointments || 0}
-                  icon="✕"
+                  icon={<XCircle size={24} />}
                 />
               </div>
 
@@ -92,13 +93,14 @@ const DoctorDashboard = () => {
                         <div className="appointment-info">
                           <h3>{apt.patientName || 'Patient'}</h3>
                           <p className="appointment-date">
-                            📅 {new Date(apt.appointmentDate).toLocaleDateString()}
+                            <Calendar size={14} style={{ marginRight: '6px' }} />
+                            {new Date(apt.appointmentDate).toLocaleDateString()}
                           </p>
                           <p className="appointment-status">
                             Status: <span className={`status-${apt.status}`}>{apt.status}</span>
                           </p>
                         </div>
-                        <button 
+                        <button
                           className="view-btn"
                           onClick={() => navigate(`/appointments/${apt._id}`)}
                         >

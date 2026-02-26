@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext.jsx'
 import { patientAPI } from '../services/apiClient'
+import { Calendar, ClipboardList, User, Clock } from 'lucide-react'
 import Header from '../components/Header'
 import Sidebar from '../components/Sidebar'
 import '../styles/dashboard.css'
@@ -64,17 +65,17 @@ const PatientDashboard = () => {
               <div className="quick-actions">
                 <ActionButton
                   label="Book Appointment"
-                  icon="📅"
+                  icon={<Calendar size={24} />}
                   onClick={() => navigate('/patient/book-appointment')}
                 />
                 <ActionButton
                   label="View Appointments"
-                  icon="📋"
+                  icon={<ClipboardList size={24} />}
                   onClick={() => navigate('/appointments')}
                 />
                 <ActionButton
                   label="My Profile"
-                  icon="👤"
+                  icon={<User size={24} />}
                   onClick={() => navigate('/patient/profile')}
                 />
               </div>
@@ -88,7 +89,8 @@ const PatientDashboard = () => {
                         <div className="appointment-info">
                           <h3>Dr. {apt.doctor?.user?.name || 'Doctor'}</h3>
                           <p className="appointment-date">
-                            📅 {new Date(apt.appointmentDate).toLocaleDateString()} at {apt.appointmentTime || apt.appointmentDate}
+                            <Calendar size={14} style={{ marginRight: '6px', verticalAlign: 'middle' }} />
+                            {new Date(apt.appointmentDate).toLocaleDateString()} at {apt.appointmentTime || apt.appointmentDate}
                           </p>
                           <p className="appointment-type">{apt.consultationType}</p>
                         </div>

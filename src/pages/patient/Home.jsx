@@ -2,6 +2,20 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext.jsx';
 import { patientAPI } from '../../services/apiClient';
+import {
+  ClipboardList,
+  Clock,
+  CheckCircle,
+  UserPlus,
+  Calendar,
+  MessageSquare,
+  FileText,
+  ShieldCheck,
+  Activity,
+  Zap,
+  ChevronRight,
+  Search
+} from 'lucide-react';
 
 export const PatientHome = () => {
   const navigate = useNavigate();
@@ -67,23 +81,33 @@ export const PatientHome = () => {
   return (
     <div style={styles.container}>
       {/* Welcome Section */}
-      <div style={styles.welcomeSection}>
-        <h2 style={styles.greeting}>Welcome, {user?.name?.split(' ')[0]}! 👋</h2>
-        <p style={styles.subtitle}>Manage your health appointments</p>
+      {/* Welcome Section / Hero */}
+      <div style={styles.heroSection}>
+        <div style={styles.heroContent}>
+          <h2 style={styles.greeting}>Hello, {user?.name?.split(' ')[0]}! 👋</h2>
+          <p style={styles.subtitle}>How can we help you today?</p>
+          <div style={styles.searchBar}>
+            <Search size={18} style={{ color: '#64748b' }} />
+            <input type="text" placeholder="Search for doctors, specialists..." style={styles.searchInput} />
+          </div>
+        </div>
+        <div style={styles.heroIllustration}>
+          <Activity size={120} color="rgba(255,255,255,0.2)" />
+        </div>
       </div>
 
       {/* Stats Cards */}
       <div style={styles.statsGrid}>
         <div style={styles.statCard}>
-          <div style={styles.statIcon}>📋</div>
+          <div style={styles.statIconWrapper}><ClipboardList className="icon-blue" /></div>
           <div style={styles.statContent}>
-            <p style={styles.statLabel}>Total Appointments</p>
+            <p style={styles.statLabel}>Total Visits</p>
             <p style={styles.statValue}>{stats.totalAppointments}</p>
           </div>
         </div>
 
         <div style={styles.statCard}>
-          <div style={styles.statIcon}>⏰</div>
+          <div style={styles.statIconWrapper}><Clock className="icon-blue" /></div>
           <div style={styles.statContent}>
             <p style={styles.statLabel}>Upcoming</p>
             <p style={styles.statValue}>{stats.upcomingAppointments}</p>
@@ -91,7 +115,7 @@ export const PatientHome = () => {
         </div>
 
         <div style={styles.statCard}>
-          <div style={styles.statIcon}>✅</div>
+          <div style={styles.statIconWrapper}><CheckCircle className="icon-green" /></div>
           <div style={styles.statContent}>
             <p style={styles.statLabel}>Completed</p>
             <p style={styles.statValue}>{stats.completedAppointments}</p>
@@ -99,7 +123,22 @@ export const PatientHome = () => {
         </div>
       </div>
 
-      {/* Quick Actions */}
+      {/* Trust Badges */}
+      <div style={styles.trustBadges}>
+        <div style={styles.badgeItem}>
+          <ShieldCheck size={18} className="icon-blue" />
+          <span>Certified Doctors</span>
+        </div>
+        <div style={styles.badgeItem}>
+          <Activity size={18} className="icon-blue" />
+          <span>24/7 Service</span>
+        </div>
+        <div style={styles.badgeItem}>
+          <Zap size={18} className="icon-blue" />
+          <span>Secure Platform</span>
+        </div>
+      </div>
+
       <div style={styles.section}>
         <h3 style={styles.sectionTitle}>Quick Actions</h3>
         <div style={styles.actionGrid}>
@@ -107,28 +146,28 @@ export const PatientHome = () => {
             style={styles.actionButton}
             onClick={() => navigate('/patient/doctors')}
           >
-            <span style={styles.actionIcon}>👨‍⚕️</span>
+            <div style={styles.actionIconWrapper}><UserPlus /></div>
             <span>Find Doctors</span>
           </button>
           <button
             style={styles.actionButton}
             onClick={() => navigate('/patient/appointments')}
           >
-            <span style={styles.actionIcon}>📅</span>
-            <span>My Appointments</span>
+            <div style={styles.actionIconWrapper}><Calendar /></div>
+            <span>Appointments</span>
           </button>
           <button
             style={styles.actionButton}
             onClick={() => navigate('/patient/messages')}
           >
-            <span style={styles.actionIcon}>💬</span>
+            <div style={styles.actionIconWrapper}><MessageSquare /></div>
             <span>Messages</span>
           </button>
           <button
             style={styles.actionButton}
             onClick={() => navigate('/patient/medical-records')}
           >
-            <span style={styles.actionIcon}>📄</span>
+            <div style={styles.actionIconWrapper}><FileText /></div>
             <span>Medical Records</span>
           </button>
         </div>
@@ -143,7 +182,7 @@ export const PatientHome = () => {
               style={styles.viewAllLink}
               onClick={() => navigate('/patient/appointments')}
             >
-              View All →
+              View All <ChevronRight size={14} />
             </button>
           </div>
           <div style={styles.appointmentsList}>
@@ -210,171 +249,229 @@ const styles = {
     flex: 1,
     overflowY: 'auto',
   },
-  welcomeSection: {
+  heroSection: {
     background: 'var(--gradient)',
     color: 'white',
-    padding: '24px 16px',
-    borderRadius: '12px',
-    marginBottom: '20px',
+    padding: '40px 32px',
+    borderRadius: '16px',
+    marginBottom: '24px',
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    position: 'relative',
+    overflow: 'hidden',
+    boxShadow: '0 10px 25px -5px rgba(0, 102, 204, 0.3)',
+  },
+  heroContent: {
+    zIndex: 1,
+    flex: 1,
+  },
+  heroIllustration: {
+    flex: '0 0 150px',
+    display: 'flex',
+    justifyContent: 'center',
+    opacity: 0.6,
   },
   greeting: {
-    fontSize: '24px',
-    fontWeight: '700',
+    fontSize: '28px',
+    fontWeight: '800',
     margin: '0 0 8px 0',
   },
   subtitle: {
-    fontSize: '14px',
+    fontSize: '16px',
     opacity: '0.9',
-    margin: '0',
+    margin: '0 0 24px 0',
+  },
+  searchBar: {
+    display: 'flex',
+    alignItems: 'center',
+    background: 'white',
+    borderRadius: '12px',
+    padding: '10px 16px',
+    gap: '12px',
+    maxWidth: '400px',
+  },
+  searchInput: {
+    border: 'none',
+    outline: 'none',
+    width: '100%',
+    fontSize: '14px',
+    color: '#1e293b',
   },
   statsGrid: {
     display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fit, minmax(100px, 1fr))',
-    gap: '12px',
+    gridTemplateColumns: 'repeat(3, 1fr)',
+    gap: '20px',
     marginBottom: '24px',
   },
   statCard: {
     background: 'white',
-    border: '1px solid var(--border-color)',
+    borderRadius: '16px',
+    padding: '20px',
+    display: 'flex',
+    alignItems: 'center',
+    gap: '16px',
+    boxShadow: 'var(--shadow)',
+  },
+  statIconWrapper: {
+    width: '48px',
+    height: '48px',
     borderRadius: '12px',
-    padding: '16px',
-    textAlign: 'center',
-    boxShadow: '0 1px 3px rgba(0, 0, 0, 0.05)',
+    background: 'var(--light-gray)',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
-  statIcon: {
-    fontSize: '28px',
-    marginBottom: '8px',
-  },
-  statContent: {},
   statLabel: {
     fontSize: '12px',
     color: 'var(--text-light)',
-    margin: '0 0 4px 0',
-  },
-  statValue: {
-    fontSize: '24px',
-    fontWeight: '700',
-    color: 'var(--secondary-color)',
+    fontWeight: '600',
     margin: '0',
   },
+  statValue: {
+    fontSize: '20px',
+    fontWeight: '700',
+    color: 'var(--text-color)',
+    margin: '0',
+  },
+  trustBadges: {
+    display: 'flex',
+    gap: '24px',
+    marginBottom: '32px',
+    padding: '0 8px',
+  },
+  badgeItem: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '8px',
+    fontSize: '13px',
+    color: 'var(--text-light)',
+    fontWeight: '500',
+  },
   section: {
-    marginBottom: '24px',
+    marginBottom: '32px',
   },
   sectionHeader: {
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: '12px',
+    marginBottom: '16px',
   },
   sectionTitle: {
-    fontSize: '16px',
-    fontWeight: '600',
+    fontSize: '18px',
+    fontWeight: '700',
     margin: '0',
     color: 'var(--text-color)',
   },
   viewAllLink: {
     background: 'none',
     border: 'none',
-    color: 'var(--secondary-color)',
-    fontSize: '12px',
+    color: 'var(--primary-color)',
+    fontSize: '13px',
     fontWeight: '600',
     cursor: 'pointer',
-    padding: '0',
+    display: 'flex',
+    alignItems: 'center',
+    gap: '4px',
   },
   actionGrid: {
     display: 'grid',
-    gridTemplateColumns: 'repeat(2, 1fr)',
-    gap: '12px',
+    gridTemplateColumns: 'repeat(4, 1fr)',
+    gap: '16px',
   },
   actionButton: {
     background: 'white',
-    border: '1px solid var(--border-color)',
-    borderRadius: '12px',
-    padding: '16px',
+    border: 'none',
+    borderRadius: '16px',
+    padding: '24px 16px',
     textAlign: 'center',
     cursor: 'pointer',
-    transition: 'all 0.3s ease',
+    transition: 'all 0.2s ease',
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
-    gap: '8px',
-    fontSize: '12px',
-    fontWeight: '500',
+    gap: '12px',
+    boxShadow: 'var(--shadow)',
     color: 'var(--text-color)',
+    fontWeight: '600',
   },
-  actionIcon: {
-    fontSize: '28px',
+  actionIconWrapper: {
+    color: 'var(--primary-color)',
   },
   appointmentsList: {
     display: 'flex',
     flexDirection: 'column',
-    gap: '12px',
+    gap: '16px',
   },
   appointmentItem: {
     background: 'white',
-    border: '1px solid var(--border-color)',
-    borderRadius: '12px',
-    padding: '12px',
+    borderRadius: '16px',
+    padding: '16px',
     display: 'flex',
     alignItems: 'center',
-    gap: '12px',
+    gap: '16px',
     cursor: 'pointer',
     transition: 'all 0.2s ease',
+    boxShadow: 'var(--shadow)',
   },
   appointmentDate: {
     textAlign: 'center',
-    minWidth: '50px',
-    padding: '8px',
-    background: 'var(--light-gray)',
-    borderRadius: '8px',
+    minWidth: '60px',
+    padding: '10px',
+    background: 'rgba(0, 102, 204, 0.05)',
+    borderRadius: '12px',
   },
   appointmentDay: {
-    fontSize: '16px',
-    fontWeight: '700',
+    fontSize: '18px',
+    fontWeight: '800',
     margin: '0',
-    color: 'var(--secondary-color)',
+    color: 'var(--primary-color)',
   },
   appointmentMonth: {
     fontSize: '12px',
     color: 'var(--text-light)',
-    margin: '4px 0 0 0',
+    fontWeight: '600',
+    margin: '0',
+    textTransform: 'uppercase',
   },
   appointmentInfo: {
     flex: 1,
   },
   doctorName: {
-    fontSize: '14px',
-    fontWeight: '600',
-    margin: '0 0 4px 0',
+    fontSize: '15px',
+    fontWeight: '700',
+    margin: '0 0 2px 0',
   },
   appointmentTime: {
-    fontSize: '12px',
+    fontSize: '13px',
     color: 'var(--text-light)',
     margin: '0',
+    display: 'flex',
+    alignItems: 'center',
+    gap: '4px',
   },
   statusBadge: {
-    padding: '4px 12px',
+    padding: '6px 14px',
     borderRadius: '20px',
-    fontSize: '11px',
-    fontWeight: '600',
+    fontSize: '12px',
+    fontWeight: '700',
     textTransform: 'capitalize',
   },
   errorBox: {
-    background: '#ffebee',
-    border: '1px solid #ef5350',
-    borderRadius: '8px',
-    padding: '16px',
-    marginTop: '20px',
+    background: '#fee2e2',
+    borderRadius: '12px',
+    padding: '20px',
     textAlign: 'center',
+    marginBottom: '24px',
   },
   retryBtn: {
     marginTop: '12px',
-    background: '#ef5350',
+    background: 'var(--danger-color)',
     color: 'white',
     border: 'none',
-    borderRadius: '6px',
-    padding: '8px 16px',
-    cursor: 'pointer',
+    borderRadius: '8px',
+    padding: '10px 20px',
+    fontWeight: '600',
   },
 };
 

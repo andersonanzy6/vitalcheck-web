@@ -15,6 +15,8 @@ import { AppointmentsPage } from './pages/patient/Appointments'
 import { MessagesPage } from './pages/patient/Messages'
 import { NotificationsPage } from './pages/patient/Notifications'
 import { ProfilePage } from './pages/patient/Profile'
+import { SymptomChecker } from './pages/patient/SymptomChecker'
+import { PaymentsPage } from './pages/patient/Payments'
 
 // Doctor Pages
 import { DoctorHome } from './pages/doctor/Home'
@@ -34,16 +36,16 @@ function App() {
   return (
     <ThemeProvider>
       <AuthProvider>
-        <Router>
+        <Router future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
           <Routes>
             {/* Auth Routes */}
             <Route path="/" element={<Navigate to="/patient/home" replace />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/register" element={<RegisterPage />} />
-            
+
             {/* Patient Routes */}
-            <Route 
-              path="/patient/*" 
+            <Route
+              path="/patient/*"
               element={
                 <PrivateRoute requiredRole="patient">
                   <MainLayout>
@@ -54,15 +56,17 @@ function App() {
                       <Route path="messages" element={<MessagesPage />} />
                       <Route path="notifications" element={<NotificationsPage />} />
                       <Route path="profile" element={<ProfilePage />} />
+                      <Route path="symptom-checker" element={<SymptomChecker />} />
+                      <Route path="payments" element={<PaymentsPage />} />
                     </Routes>
                   </MainLayout>
                 </PrivateRoute>
-              } 
+              }
             />
-            
+
             {/* Doctor Routes */}
-            <Route 
-              path="/doctor/*" 
+            <Route
+              path="/doctor/*"
               element={
                 <PrivateRoute requiredRole="doctor">
                   <MainLayout>
@@ -75,71 +79,71 @@ function App() {
                     </Routes>
                   </MainLayout>
                 </PrivateRoute>
-              } 
+              }
             />
-            
+
             {/* Shared Routes - No Layout */}
-            <Route 
-              path="/shared/chat/:doctorId" 
+            <Route
+              path="/shared/chat/:doctorId"
               element={
                 <PrivateRoute>
                   <ChatScreen />
                 </PrivateRoute>
-              } 
+              }
             />
-            <Route 
-              path="/shared/doctor-detail/:doctorId" 
+            <Route
+              path="/shared/doctor-detail/:doctorId"
               element={
                 <PrivateRoute>
                   <MainLayout>
                     <DoctorDetailPage />
                   </MainLayout>
                 </PrivateRoute>
-              } 
+              }
             />
-            <Route 
-              path="/patient/booking/:doctorId" 
+            <Route
+              path="/patient/booking/:doctorId"
               element={
                 <PrivateRoute requiredRole="patient">
                   <MainLayout>
                     <BookingFlowPage />
                   </MainLayout>
                 </PrivateRoute>
-              } 
+              }
             />
-            <Route 
-              path="/patient/medical-records" 
+            <Route
+              path="/patient/medical-records"
               element={
                 <PrivateRoute requiredRole="patient">
                   <MainLayout>
                     <MedicalRecordsPage />
                   </MainLayout>
                 </PrivateRoute>
-              } 
+              }
             />
-            <Route 
-              path="/patient/appointment-detail/:appointmentId" 
+            <Route
+              path="/patient/appointment-detail/:appointmentId"
               element={
                 <PrivateRoute requiredRole="patient">
                   <MainLayout>
                     <AppointmentDetailPage />
                   </MainLayout>
                 </PrivateRoute>
-              } 
+              }
             />
-            <Route 
-              path="/shared/appointment-detail/:appointmentId" 
+            <Route
+              path="/shared/appointment-detail/:appointmentId"
               element={
                 <PrivateRoute>
                   <MainLayout>
                     <AppointmentDetailPage />
                   </MainLayout>
                 </PrivateRoute>
-              } 
+              }
             />
-            
+
             {/* Catch all */}
-            <Route path="*" element={<Navigate to="/patient/home" replace />} />
+            <Route path="*" element={<Navigate to="/login" replace />} />
           </Routes>
         </Router>
       </AuthProvider>
