@@ -84,12 +84,19 @@ export const PatientHome = () => {
       {/* Welcome Section / Hero */}
       <div style={styles.heroSection}>
         <div style={styles.heroContent}>
-          <h2 style={styles.greeting}>Hello, {user?.name?.split(' ')[0]}! 👋</h2>
-          <p style={styles.subtitle}>How can we help you today?</p>
+          <h2 style={styles.greeting}>Hello, {user?.name?.split(' ')[0]}!</h2>
+          <p style={styles.subtitle}>What are your complains today?</p>
           <div style={styles.searchBar}>
             <Search size={18} style={{ color: '#64748b' }} />
-            <input type="text" placeholder="Search for doctors, specialists..." style={styles.searchInput} />
+            <input type="text" placeholder="Search for specialists" style={styles.searchInput} />
           </div>
+          <button 
+            style={styles.symptomButton}
+            onClick={() => navigate('/patient/symptom-checker')}
+          >
+            <Zap size={18} />
+            Quick Symptom Check
+          </button>
         </div>
         <div style={styles.heroIllustration}>
           <Activity size={120} color="rgba(255,255,255,0.2)" />
@@ -297,6 +304,22 @@ const styles = {
     width: '100%',
     fontSize: '14px',
     color: '#1e293b',
+  },
+  symptomButton: {
+    marginTop: '16px',
+    background: 'white',
+    border: 'none',
+    borderRadius: '12px',
+    padding: '12px 24px',
+    fontSize: '14px',
+    fontWeight: '600',
+    color: 'var(--primary-color)',
+    cursor: 'pointer',
+    display: 'flex',
+    alignItems: 'center',
+    gap: '8px',
+    transition: 'all 0.2s ease',
+    boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
   },
   statsGrid: {
     display: 'grid',
