@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext.jsx';
 import { chatAPI } from '../../services/apiClient';
+import CallManager from '../../components/calls/CallManager';
 import io from 'socket.io-client';
 
 export const ChatScreen = () => {
@@ -85,11 +86,14 @@ export const ChatScreen = () => {
   const initializeSocket = () => {
     try {
       const token = localStorage.getItem('authToken');
-      socketRef.current = io(import.meta.env.VITE_API_URL || 'http://localhost:3000', {
+      socketRef.current = io(import.meta.env.VITE_API_URL || 'http://localhost:5000', {
         auth: {
           token: token,
         },
       });
+
+      // Store socket globally for call components to access
+      window.socketRef = socketRef.current;
 
       socketRef.current.on('connect', () => {
         console.log('Socket connected');
@@ -209,6 +213,14 @@ export const ChatScreen = () => {
           </h2>
           <p style={styles.status}>Online</p>
         </div>
+        {/* Call buttons */}
+        {otherParticipant && (
+          <CallManager 
+            currentUserId={user?._id || user?.id}
+            targetUserId={otherParticipant?._id || doctorId}
+            targetUserName={otherParticipant?.name}
+          />
+        )}
       </div>
 
       {/* Messages */}

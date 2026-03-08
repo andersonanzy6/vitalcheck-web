@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext.jsx'
 import { notificationAPI } from '../services/apiClient'
+import IncomingCall from './calls/IncomingCall'
 import {
   Home,
   User,
@@ -74,6 +75,8 @@ const MainLayout = ({ children }) => {
 
   return (
     <div className="main-layout">
+      {/* Incoming Call Listener - Appears over everything */}
+      <IncomingCall currentUserId={user?._id || user?.id} />
       {/* Mobile Header */}
       <header className="mobile-header">
         <div className="header-content">

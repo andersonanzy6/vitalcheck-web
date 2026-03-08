@@ -1,4 +1,5 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
+import { HMSRoomProvider } from '@100mslive/react-sdk'
 import { AuthProvider, useAuth } from './context/AuthContext.jsx'
 import { ThemeProvider } from './context/ThemeContext.jsx'
 import PrivateRoute from './components/PrivateRoute'
@@ -36,7 +37,8 @@ function App() {
   return (
     <ThemeProvider>
       <AuthProvider>
-        <Router future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+        <HMSRoomProvider>
+          <Router future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
           <Routes>
             {/* Auth Routes */}
             <Route path="/" element={<Navigate to="/patient/home" replace />} />
@@ -146,6 +148,7 @@ function App() {
             <Route path="*" element={<Navigate to="/login" replace />} />
           </Routes>
         </Router>
+        </HMSRoomProvider>
       </AuthProvider>
     </ThemeProvider>
   )
