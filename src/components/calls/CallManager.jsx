@@ -13,7 +13,7 @@ export const CallManager = ({ currentUserId, targetUserId, targetUserName }) => 
     try {
       // Create room via API
       const response = await axios.post(
-        `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/call/create-room`,
+        `${import.meta.env.VITE_API_URL || 'https://vitalcheck-56uj.onrender.com'}/api/call/create-room`,
         {},
         { headers: { Authorization: `Bearer ${localStorage.getItem('authToken')}` } }
       )
