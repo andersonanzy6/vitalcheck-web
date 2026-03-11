@@ -180,6 +180,69 @@
   cursor: not-allowed;
 }
 
+/* Payment Information Styles */
+.payment-info-box {
+  background: linear-gradient(135deg, #f0f7ff 0%, #e0f2fe 100%);
+  border: 2px solid #0284c7;
+  border-radius: 8px;
+  padding: 20px;
+  margin-top: 12px;
+}
+
+.payment-info-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: #0369a1;
+  margin-bottom: 8px;
+}
+
+.payment-info-text {
+  font-size: 14px;
+  color: #0369a1;
+  margin-bottom: 16px;
+  line-height: 1.5;
+}
+
+.bank-details {
+  background: white;
+  border-radius: 6px;
+  padding: 16px;
+  margin-bottom: 12px;
+  border-left: 4px solid #0284c7;
+}
+
+.bank-detail-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 0;
+  border-bottom: 1px solid #e0e0e0;
+  font-size: 13px;
+}
+
+.bank-detail-item:last-child {
+  border-bottom: none;
+}
+
+.detail-label {
+  font-weight: 600;
+  color: #666;
+}
+
+.detail-value {
+  font-weight: 700;
+  color: #333;
+  font-family: monospace;
+}
+
+.payment-note {
+  font-size: 12px;
+  color: #0369a1;
+  background: white;
+  padding: 8px;
+  border-radius: 4px;
+  margin: 0;
+}
+
 @media (max-width: 768px) {
   .booking-card {
     padding: 20px;

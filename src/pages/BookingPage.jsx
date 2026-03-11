@@ -183,6 +183,31 @@ const BookingPage = () => {
                 </div>
               </div>
 
+              <div className="form-section">
+                <h3>Payment Information</h3>
+                <div className="payment-info-box">
+                  <p className="payment-info-title">💳 Payment Required</p>
+                  <p className="payment-info-text">
+                    After booking your appointment, you'll be required to make payment via bank transfer to confirm your appointment.
+                  </p>
+                  <div className="bank-details">
+                    <div className="bank-detail-item">
+                      <span className="detail-label">Account Name:</span>
+                      <span className="detail-value">Vital Check Care Service Ltd</span>
+                    </div>
+                    <div className="bank-detail-item">
+                      <span className="detail-label">Bank:</span>
+                      <span className="detail-value">Monie Point MFB</span>
+                    </div>
+                    <div className="bank-detail-item">
+                      <span className="detail-label">Account Number:</span>
+                      <span className="detail-value">8037753218</span>
+                    </div>
+                  </div>
+                  <p className="payment-note">ℹ️ Payment details will also be provided after booking confirmation.</p>
+                </div>
+              </div>
+
               {error && <div className="error-message">{error}</div>}
               {success && <div className="success-message">{success}</div>}
 

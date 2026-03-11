@@ -67,40 +67,94 @@ export const PaymentsPage = () => {
             {/* Payment Methods Section */}
             <section style={styles.section}>
                 <div style={styles.sectionHeader}>
-                    <h2 style={styles.sectionTitle}>Saved Methods</h2>
-                    <button style={styles.addBtn}>
-                        <Plus size={16} /> Add Method
-                    </button>
+                    <h2 style={styles.sectionTitle}>Available Payment Methods</h2>
                 </div>
 
                 <div style={styles.methodsGrid}>
-                    <div style={styles.methodCard}>
+                    {/* Bank Transfer - Available Now */}
+                    <div style={{...styles.methodCard, borderColor: '#10b981', borderWidth: '2px'}}>
+                        <div style={styles.methodInfo}>
+                            <div style={{ ...styles.methodIcon, background: '#e0f7e0' }}>
+                                <DollarSign color="#10b981" size={24} />
+                            </div>
+                            <div>
+                                <p style={styles.methodName}>Bank Transfer</p>
+                                <p style={styles.methodExpiry}>Direct bank payment</p>
+                            </div>
+                        </div>
+                        <div style={{...styles.badge, background: '#d1fae5', color: '#065f46'}}>Available</div>
+                    </div>
+
+                    {/* Coming Soon Methods */}
+                    <div style={{...styles.methodCard, opacity: 0.6, cursor: 'not-allowed'}}>
                         <div style={styles.methodInfo}>
                             <div style={{ ...styles.methodIcon, background: '#f0f7ff' }}>
                                 <CreditCard color="#0066cc" size={24} />
                             </div>
                             <div>
-                                <p style={styles.methodName}>Visa ending in 4242</p>
-                                <p style={styles.methodExpiry}>Expires 12/26</p>
+                                <p style={styles.methodName}>Credit/Debit Card</p>
+                                <p style={styles.methodExpiry}>Visa, Mastercard, Amex</p>
                             </div>
                         </div>
-                        <div style={styles.badge}>Default</div>
+                        <div style={{...styles.badge, background: '#f3f4f6', color: '#6b7280'}}>Coming Soon</div>
                     </div>
 
-                    <div style={styles.methodCard}>
+                    <div style={{...styles.methodCard, opacity: 0.6, cursor: 'not-allowed'}}>
                         <div style={styles.methodInfo}>
                             <div style={{ ...styles.methodIcon, background: '#fff9eb' }}>
                                 <DollarSign color="#f59e0b" size={24} />
                             </div>
                             <div>
-                                <p style={styles.methodName}>PayPal (johndoe@example.com)</p>
-                                <p style={styles.methodExpiry}>Connected</p>
+                                <p style={styles.methodName}>PayPal</p>
+                                <p style={styles.methodExpiry}>International payments</p>
                             </div>
                         </div>
-                        <button style={styles.iconBtn} title="Remove">
-                            <Trash2 size={16} color="#ef4444" />
-                        </button>
+                        <div style={{...styles.badge, background: '#f3f4f6', color: '#6b7280'}}>Coming Soon</div>
                     </div>
+
+                    <div style={{...styles.methodCard, opacity: 0.6, cursor: 'not-allowed'}}>
+                        <div style={styles.methodInfo}>
+                            <div style={{ ...styles.methodIcon, background: '#fef2f2' }}>
+                                <CreditCard color="#dc2626" size={24} />
+                            </div>
+                            <div>
+                                <p style={styles.methodName}>Flutterwave</p>
+                                <p style={styles.methodExpiry}>African payments</p>
+                            </div>
+                        </div>
+                        <div style={{...styles.badge, background: '#f3f4f6', color: '#6b7280'}}>Coming Soon</div>
+                    </div>
+                </div>
+
+                <div style={styles.infoBox}>
+                    <AlertCircle size={18} color="#0066cc" />
+                    <p>We're continuously adding new payment methods. Bank transfer is currently available for all appointments. More options will be added soon.</p>
+                </div>
+
+                {/* Bank Transfer Details */}
+                <div style={styles.bankDetailsSection}>
+                    <h3 style={styles.bankDetailsTitle}>Bank Transfer Details</h3>
+                    <div style={styles.bankDetailsCard}>
+                        <div style={styles.bankDetailRow}>
+                            <span style={styles.bankDetailLabel}>Account Name:</span>
+                            <span style={styles.bankDetailValue}>Vital Check Care Service Ltd</span>
+                        </div>
+                        <div style={styles.bankDetailRow}>
+                            <span style={styles.bankDetailLabel}>Bank:</span>
+                            <span style={styles.bankDetailValue}>Monie Point MFB</span>
+                        </div>
+                        <div style={styles.bankDetailRow}>
+                            <span style={styles.bankDetailLabel}>Account Number:</span>
+                            <span style={styles.bankDetailValue}>8037753218</span>
+                        </div>
+                        <div style={{...styles.bankDetailRow, borderBottom: 'none'}}>
+                            <span style={styles.bankDetailLabel}>Purpose:</span>
+                            <span style={styles.bankDetailValue}>Appointment Fee + Your Name</span>
+                        </div>
+                    </div>
+                    <p style={styles.bankInstructionsText}>
+                        ⚠️ <strong>Important:</strong> Please use your full name and the appointment ID in the transfer reference for quick verification.
+                    </p>
                 </div>
             </section>
 
@@ -388,6 +442,66 @@ const styles = {
         background: 'white',
         borderRadius: '12px',
         border: '1px solid var(--border-color)',
+    },
+    infoBox: {
+        marginTop: '24px',
+        padding: '16px',
+        background: '#e0f2fe',
+        border: '1px solid #0284c7',
+        borderRadius: '8px',
+        display: 'flex',
+        alignItems: 'center',
+        gap: '12px',
+        color: '#0369a1',
+        fontSize: '14px',
+    },
+    bankDetailsSection: {
+        marginTop: '32px',
+        padding: '24px',
+        background: '#fafafa',
+        border: '1px solid var(--border-color)',
+        borderRadius: '12px',
+    },
+    bankDetailsTitle: {
+        fontSize: '16px',
+        fontWeight: '700',
+        color: 'var(--text-color)',
+        marginBottom: '16px',
+    },
+    bankDetailsCard: {
+        background: 'white',
+        border: '1px solid var(--border-color)',
+        borderRadius: '8px',
+        padding: '20px',
+        marginBottom: '16px',
+    },
+    bankDetailRow: {
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        paddingBottom: '12px',
+        marginBottom: '12px',
+        borderBottom: '1px solid var(--border-color)',
+    },
+    bankDetailLabel: {
+        fontSize: '14px',
+        fontWeight: '600',
+        color: 'var(--text-light)',
+    },
+    bankDetailValue: {
+        fontSize: '14px',
+        fontWeight: '600',
+        color: 'var(--text-color)',
+        fontFamily: 'monospace',
+    },
+    bankInstructionsText: {
+        fontSize: '13px',
+        color: '#dc2626',
+        background: '#fee2e2',
+        padding: '12px',
+        borderRadius: '6px',
+        marginTop: '12px',
+        lineHeight: '1.5',
     }
 };
 
