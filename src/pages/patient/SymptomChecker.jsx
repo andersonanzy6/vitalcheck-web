@@ -18,7 +18,7 @@ export const SymptomChecker = () => {
     const [messages, setMessages] = useState([
         {
             sender: 'ai',
-            content: 'Hello! I am your AI Symptom Checker. Please describe what symptoms you are feeling today.',
+            content: 'Hello! I am your Symptom Checker. Please describe what symptoms you are feeling today.',
             timestamp: new Date()
         }
     ])
@@ -70,7 +70,7 @@ export const SymptomChecker = () => {
             console.error('Symptom check error:', error)
             setMessages(prev => [...prev, {
                 sender: 'ai',
-                content: 'I encountered an error. Please try again or consult a doctor.',
+                content: 'I encountered an error. Please try again or consult a physician.',
                 timestamp: new Date()
             }])
         } finally {
@@ -90,7 +90,7 @@ export const SymptomChecker = () => {
                     <ChevronLeft size={24} />
                 </button>
                 <div style={styles.headerContent}>
-                    <h2 style={styles.title}>AI Symptom Checker</h2>
+                    <h2 style={styles.title}>Symptom Checker</h2>
                     <p style={styles.status}>
                         <Sparkles size={12} style={{ marginRight: '4px' }} />
                         Always Active
@@ -182,7 +182,7 @@ export const SymptomChecker = () => {
 
                     {result.suggestDoctor && (
                         <div style={styles.suggestionBox}>
-                            <p style={{ fontSize: '13px', marginBottom: '12px' }}>We recommend booking a consultation with a specialist for a proper diagnosis.</p>
+                            <p style={{ fontSize: '13px', marginBottom: '12px' }}>We recommend booking a consultation with a physician for a proper diagnosis.</p>
                             <button
                                 style={styles.primaryButton}
                                 onClick={() => navigate('/patient/doctors')}

@@ -75,7 +75,7 @@ export const DoctorsPage = () => {
       <div style={styles.header}>
         <div style={styles.headerContent}>
           <h2 style={styles.title}>Find Doctors</h2>
-          <p style={styles.subtitle}>Book appointments with top specialists near you.</p>
+          <p style={styles.subtitle}>Book appointments with top physicians near you.</p>
         </div>
         <div style={styles.headerIcon}><Users size={40} /></div>
       </div>

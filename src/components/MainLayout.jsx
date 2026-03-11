@@ -39,7 +39,7 @@ const MainLayout = ({ children }) => {
   const fetchUnreadCount = async () => {
     try {
       const res = await notificationAPI.getUnreadCount()
-      setUnreadCount(res.data.count || 0)
+      setUnreadCount(res.data.unreadCount || 0)
     } catch (err) {
       console.error('Error fetching unread count:', err)
     }
