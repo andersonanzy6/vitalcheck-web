@@ -4,6 +4,16 @@ import { Phone, PhoneOff, Video } from 'lucide-react'
 import ActiveCall from './ActiveCall'
 import axios from 'axios'
 
+// Helper function to construct API URLs properly
+const getAPIUrl = (endpoint) => {
+  const baseURL = import.meta.env.VITE_API_URL || 'https://vitalcheck-56uj.onrender.com'
+  // Remove trailing slash from baseURL if present
+  const cleanBase = baseURL.endsWith('/') ? baseURL.slice(0, -1) : baseURL
+  // Ensure endpoint starts with /
+  const cleanEndpoint = endpoint.startsWith('/') ? endpoint : `/${endpoint}`
+  return `${cleanBase}${cleanEndpoint}`
+}
+
 export const IncomingCall = ({ currentUserId }) => {
   const hmsActions = useHMSActions()
   const [incomingCall, setIncomingCall] = useState(null)
@@ -51,7 +61,7 @@ export const IncomingCall = ({ currentUserId }) => {
 
       // Get auth token for joining room
       const response = await axios.post(
-        `${import.meta.env.VITE_API_URL || 'https://vitalcheck-56uj.onrender.com'}/api/call/join-room`,
+        getAPIUrl('/api/call/join-room'),
         { roomId: incomingCall.roomId },
         { headers: { Authorization: `Bearer ${localStorage.getItem('authToken')}` } }
       )

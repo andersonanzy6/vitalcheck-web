@@ -9,7 +9,8 @@ import {
     ArrowRight,
     ChevronLeft,
     Sparkles,
-    Info
+    Info,
+    Phone
 } from 'lucide-react'
 import { aiAPI } from '../../services/apiClient'
 
@@ -191,6 +192,17 @@ export const SymptomChecker = () => {
                             </button>
                         </div>
                     )}
+
+                    <button
+                        style={styles.consultPhysicianButton}
+                        onClick={() => navigate('/patient/doctors')}
+                        onMouseEnter={(e) => e.target.style.transform = 'translateY(-2px)'}
+                        onMouseLeave={(e) => e.target.style.transform = 'translateY(0)'}
+                    >
+                        <Phone size={20} style={{ marginRight: '8px' }} />
+                        <span>Consult a Physician</span>
+                        <ArrowRight size={18} style={{ marginLeft: 'auto' }} />
+                    </button>
 
                     <p style={styles.disclaimer}>
                         Note: This AI analysis is for informational purposes only.
@@ -446,6 +458,24 @@ const styles = {
         alignItems: 'center',
         justifyContent: 'center',
         cursor: 'pointer',
+    },
+    consultPhysicianButton: {
+        width: '100%',
+        background: 'linear-gradient(135deg, var(--primary-color) 0%, #0066cc 100%)',
+        color: 'white',
+        border: 'none',
+        padding: '16px 20px',
+        borderRadius: '12px',
+        fontWeight: '700',
+        fontSize: '15px',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'flex-start',
+        cursor: 'pointer',
+        marginTop: '16px',
+        marginBottom: '16px',
+        boxShadow: '0 4px 15px rgba(0, 102, 204, 0.3)',
+        transition: 'all 0.3s ease',
     },
     disclaimer: {
         fontSize: '11px',

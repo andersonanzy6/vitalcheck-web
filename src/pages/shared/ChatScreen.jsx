@@ -1,8 +1,9 @@
 import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext.jsx';
-import { chatAPI } from '../../services/apiClient';
+import { chatAPI, patientAPI } from '../../services/apiClient';
 import CallManager from '../../components/calls/CallManager';
+import IncomingCall from '../../components/calls/IncomingCall';
 import io from 'socket.io-client';
 
 export const ChatScreen = () => {
@@ -18,6 +19,8 @@ export const ChatScreen = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [conversationId, setConversationId] = useState(null);
+  const [isOnline, setIsOnline] = useState(false);
+  const [lastSeen, setLastSeen] = useState(null);
 
   useEffect(() => {
     fetchConversation();
@@ -68,9 +71,29 @@ export const ChatScreen = () => {
         const currentUserId = (user?.id || user?._id)?.toString();
         const otherUserData = firstMsg.sender._id?.toString() === currentUserId ? firstMsg.receiver : firstMsg.sender;
         setOtherParticipant(otherUserData);
+        
+        // Fetch doctor's lastSeen/online status
+        try {
+          const doctorDetailsResponse = await patientAPI.getDoctorDetails(doctorId);
+          const doctorData = doctorDetailsResponse.data;
+          
+          if (doctorData?.isOnline) {
+            setIsOnline(true);
+            setLastSeen(null);
+          } else {
+            setIsOnline(false);
+            setLastSeen(doctorData?.lastSeen ? new Date(doctorData.lastSeen) : new Date());
+          }
+        } catch (err) {
+          console.warn('Could not fetch doctor details:', err);
+          setIsOnline(false);
+          setLastSeen(new Date());
+        }
       } else {
         // If no messages, we'll fetch the user details differently
         console.warn('No messages found, other participant info not available yet');
+        setIsOnline(false);
+        setLastSeen(new Date());
       }
 
       // Store doctor ID as conversation ID for socket operations
@@ -102,6 +125,24 @@ export const ChatScreen = () => {
 
       socketRef.current.on('message_received', (message) => {
         setMessages(prev => [...prev, message]);
+      });
+
+      // Listen for user online status
+      socketRef.current.on('user_online', (data) => {
+        if (data.userId === doctorId) {
+          console.log('User is online:', data.userId);
+          setIsOnline(true);
+          setLastSeen(null);
+        }
+      });
+
+      // Listen for user offline status
+      socketRef.current.on('user_offline', (data) => {
+        if (data.userId === doctorId) {
+          console.log('User is offline:', data.userId);
+          setIsOnline(false);
+          setLastSeen(new Date());
+        }
       });
 
       socketRef.current.on('error', (err) => {
@@ -166,6 +207,28 @@ export const ChatScreen = () => {
     }
   };
 
+  const formatLastSeen = (date) => {
+    if (!date) return 'Online';
+    
+    const now = new Date();
+    const diffMs = now - date;
+    const diffMins = Math.floor(diffMs / 60000);
+    const diffHours = Math.floor(diffMs / 3600000);
+    const diffDays = Math.floor(diffMs / 86400000);
+
+    if (diffMins < 1) {
+      return 'Last seen just now';
+    } else if (diffMins < 60) {
+      return `Last seen ${diffMins}m ago`;
+    } else if (diffHours < 24) {
+      return `Last seen ${diffHours}h ago`;
+    } else if (diffDays === 1) {
+      return 'Last seen yesterday';
+    } else {
+      return `Last seen ${date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`;
+    }
+  };
+
   let lastMessageDate = null;
 
   if (loading) {
@@ -202,6 +265,9 @@ export const ChatScreen = () => {
 
   return (
     <div style={styles.container}>
+      {/* Incoming Call Component */}
+      <IncomingCall currentUserId={user?._id || user?.id} />
+
       {/* Chat Header */}
       <div style={styles.header}>
         <button style={styles.backBtn} onClick={() => navigate(-1)}>
@@ -211,7 +277,15 @@ export const ChatScreen = () => {
           <h2 style={styles.title}>
             {otherParticipant?.name || 'Chat'}
           </h2>
-          <p style={styles.status}>Online</p>
+          <p style={styles.status}>
+            {isOnline ? (
+              <>
+                <span style={styles.onlineDot}></span> Online
+              </>
+            ) : (
+              formatLastSeen(lastSeen)
+            )}
+          </p>
         </div>
         {/* Call buttons */}
         {otherParticipant && (
@@ -359,6 +433,17 @@ const styles = {
     fontSize: '12px',
     margin: '0',
     opacity: '0.8',
+    display: 'flex',
+    alignItems: 'center',
+    gap: '4px',
+  },
+  onlineDot: {
+    width: '8px',
+    height: '8px',
+    borderRadius: '50%',
+    background: '#10b981',
+    display: 'inline-block',
+    animation: 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
   },
   messagesContainer: {
     flex: 1,

@@ -57,10 +57,55 @@ export const DoctorsPage = () => {
       filtered = filtered.filter(doc => doc.specialization === selectedSpecialty);
     }
 
+    // Sort doctors with physicians appearing first
+    filtered = sortDoctorsByPriority(filtered);
+
     setFilteredDoctors(filtered);
   };
 
-  const specialties = [...new Set(doctors.map(doc => doc.specialization).filter(Boolean))];
+  const getSpecializationPriority = (specialization) => {
+    const normalized = specialization?.toLowerCase() || '';
+    
+    // Physician specializations get priority 0 (appear first)
+    if (
+      normalized.includes('physician') ||
+      normalized.includes('general practitioner') ||
+      normalized.includes('gp') ||
+      normalized.includes('family medicine') ||
+      normalized.includes('internal medicine') ||
+      normalized.includes('doctor')
+    ) {
+      return 0;
+    }
+    
+    // Other specialists get priority 1
+    return 1;
+  };
+
+  const sortDoctorsByPriority = (doctorsToSort) => {
+    return doctorsToSort.sort((a, b) => {
+      const priorityA = getSpecializationPriority(a.specialization);
+      const priorityB = getSpecializationPriority(b.specialization);
+      
+      if (priorityA !== priorityB) {
+        return priorityA - priorityB;
+      }
+      
+      // If same priority, sort by rating (highest first)
+      return (b.rating || 0) - (a.rating || 0);
+    });
+  };
+
+  const specialties = [...new Set(doctors.map(doc => doc.specialization).filter(Boolean))].sort((a, b) => {
+    const priorityA = getSpecializationPriority(a);
+    const priorityB = getSpecializationPriority(b);
+    
+    if (priorityA !== priorityB) {
+      return priorityA - priorityB;
+    }
+    
+    return a.localeCompare(b);
+  });
 
   if (loading) {
     return (
