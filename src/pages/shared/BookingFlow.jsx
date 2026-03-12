@@ -11,8 +11,17 @@ import {
   ArrowRight,
   ShieldCheck,
   AlertCircle,
-  Activity
+  Activity,
+  Copy
 } from 'lucide-react';
+
+const BOOKING_FEE = 3000 // Naira
+const BANK_ACCOUNT = {
+  accountName: 'Vital Check Care Service Ltd',
+  bank: 'Monie Point MFB',
+  accountNumber: '8037753218',
+  purpose: 'Appointment Fee + Your Name'
+}
 
 export const BookingFlowPage = () => {
   const { doctorId } = useParams();
@@ -21,7 +30,8 @@ export const BookingFlowPage = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [doctor, setDoctor] = useState(null);
-  const [paymentMethod, setPaymentMethod] = useState('card');
+  const [paymentConfirmed, setPaymentConfirmed] = useState(false);
+  const [copied, setCopied] = useState(false);
   const [formData, setFormData] = useState({
     doctorId: doctorId || '',
     appointmentDate: '',
@@ -57,13 +67,14 @@ export const BookingFlowPage = () => {
       return;
     }
 
+    if (!paymentConfirmed) {
+      setError('Please confirm that you have completed the bank transfer');
+      return;
+    }
+
     try {
       setLoading(true);
       setError(null);
-
-      // Simulate Payment Verification
-      // In a real app, we would initiate Stripe/Paypal here
-      console.log("Processing payment via", paymentMethod);
 
       const dateObj = new Date(formData.appointmentDate);
       const appointmentTime = dateObj.toLocaleTimeString('en-US', {
@@ -78,8 +89,9 @@ export const BookingFlowPage = () => {
         appointmentTime: appointmentTime,
         consultationType: formData.consultationType,
         reasonForVisit: `Symptoms: ${formData.symptoms}. Notes: ${formData.notes}`,
-        paymentStatus: 'paid', // Enforce paid status
-        amount: doctor?.consultationFee || 50,
+        paymentStatus: 'payment_pending_verification',
+        paymentMethod: 'bank_transfer',
+        amount: BOOKING_FEE,
       });
 
       setStep(4); // Success step
@@ -89,6 +101,12 @@ export const BookingFlowPage = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const copyToClipboard = (text) => {
+    navigator.clipboard.writeText(text);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
   };
 
   return (
@@ -185,52 +203,109 @@ export const BookingFlowPage = () => {
       {/* Step 3: Payment */}
       {step === 3 && (
         <div style={styles.stepContent}>
-          <h3 style={styles.stepTitle}>Secure Payment</h3>
+          <h3 style={styles.stepTitle}>💳 Complete Payment via Bank Transfer</h3>
           <div style={styles.paymentCard}>
+            {/* Summary */}
             <div style={styles.summaryBox}>
               <div style={styles.summaryRow}>
                 <span>Consultation Fee</span>
-                <span style={styles.amount}>${doctor?.consultationFee || 50}</span>
-              </div>
-              <div style={styles.summaryRow}>
-                <span>Service Fee</span>
-                <span>$2.00</span>
+                <span style={styles.amount}>₦{BOOKING_FEE.toLocaleString()}</span>
               </div>
               <div style={{ ...styles.summaryRow, borderTop: '1px dashed #cbd5e1', paddingTop: '12px', marginTop: '12px' }}>
-                <span style={{ fontWeight: '800' }}>Total</span>
-                <span style={{ fontWeight: '800', fontSize: '20px', color: 'var(--primary-color)' }}>
-                  ${(doctor?.consultationFee || 50) + 2}
+                <span style={{ fontWeight: '800' }}>Total Amount</span>
+                <span style={{ fontWeight: '800', fontSize: '20px', color: '#10b981' }}>
+                  ₦{BOOKING_FEE.toLocaleString()}
                 </span>
               </div>
             </div>
 
-            <div style={styles.paymentMethods}>
-              <label style={{ ...styles.paymentOption, ...(paymentMethod === 'card' ? styles.paymentOptionActive : {}) }}>
+            {/* Bank Transfer Details */}
+            <div style={{...styles.bankSection, background: '#fafafa', padding: '20px', borderRadius: '12px', border: '2px solid #10b981', marginTop: '20px'}}>
+              <h4 style={{ margin: '0 0 16px 0', fontSize: '16px', fontWeight: '700' }}>Bank Account Details</h4>
+              
+              <div style={styles.bankDetailRow}>
+                <span style={styles.bankLabel}>Amount:</span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <span style={{ fontStyle: 'monospace', fontWeight: '600', fontSize: '16px', color: '#10b981' }}>₦{BOOKING_FEE.toLocaleString()}</span>
+                </div>
+              </div>
+
+              <div style={styles.bankDetailRow}>
+                <span style={styles.bankLabel}>Account Name:</span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <span>{BANK_ACCOUNT.accountName}</span>
+                  <button style={styles.copyBtn} onClick={() => copyToClipboard(BANK_ACCOUNT.accountName)} title="Copy">
+                    <Copy size={14} />
+                  </button>
+                </div>
+              </div>
+
+              <div style={styles.bankDetailRow}>
+                <span style={styles.bankLabel}>Bank:</span>
+                <span>{BANK_ACCOUNT.bank}</span>
+              </div>
+
+              <div style={styles.bankDetailRow}>
+                <span style={styles.bankLabel}>Account Number:</span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <span style={{ fontFamily: 'monospace', fontSize: '16px', fontWeight: '600' }}>{BANK_ACCOUNT.accountNumber}</span>
+                  <button style={styles.copyBtn} onClick={() => copyToClipboard(BANK_ACCOUNT.accountNumber)} title="Copy">
+                    <Copy size={14} />
+                  </button>
+                </div>
+              </div>
+
+              <div style={{...styles.bankDetailRow, borderBottom: 'none'}}>
+                <span style={styles.bankLabel}>Reference:</span>
+                <span style={{ fontSize: '13px' }}>{BANK_ACCOUNT.purpose}</span>
+              </div>
+
+              {copied && <p style={{ fontSize: '12px', color: '#10b981', marginTop: '8px' }}>✓ Copied to clipboard</p>}
+
+              <p style={{
+                marginTop: '16px',
+                padding: '12px',
+                background: '#eff6ff',
+                border: '1px solid #bfdbfe',
+                borderRadius: '8px',
+                fontSize: '13px',
+                color: '#0369a1'
+              }}>
+                <AlertCircle size={14} style={{ display: 'inline', marginRight: '6px' }} />
+                <strong>Important:</strong> Include your full name in the transfer reference for quick verification.
+              </p>
+            </div>
+
+            {/* Confirmation Checkbox */}
+            <div style={{
+              background: '#f0fdf4',
+              padding: '16px',
+              borderRadius: '12px',
+              marginTop: '20px',
+              border: '1px solid #dcfce7'
+            }}>
+              <label style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '12px',
+                cursor: 'pointer',
+                fontSize: '14px'
+              }}>
                 <input
-                  type="radio"
-                  name="payment"
-                  checked={paymentMethod === 'card'}
-                  onChange={() => setPaymentMethod('card')}
-                  style={{ display: 'none' }}
+                  type="checkbox"
+                  checked={paymentConfirmed}
+                  onChange={(e) => {
+                    setPaymentConfirmed(e.target.checked);
+                    setError(null);
+                  }}
+                  style={{ width: '20px', height: '20px', cursor: 'pointer' }}
                 />
-                <CreditCard size={20} />
-                <span>Credit / Debit Card</span>
-              </label>
-              <label style={{ ...styles.paymentOption, ...(paymentMethod === 'paypal' ? styles.paymentOptionActive : {}) }}>
-                <input
-                  type="radio"
-                  name="payment"
-                  checked={paymentMethod === 'paypal'}
-                  onChange={() => setPaymentMethod('paypal')}
-                  style={{ display: 'none' }}
-                />
-                <Activity size={20} />
-                <span>PayPal</span>
+                <span style={{ fontWeight: '500' }}>I have completed the bank transfer of ₦{BOOKING_FEE.toLocaleString()}</span>
               </label>
             </div>
 
             <p style={styles.securityNote}>
-              <ShieldCheck size={14} /> Your payment is secured and encrypted.
+              <ShieldCheck size={14} /> Your appointment will be confirmed after payment verification.
             </p>
           </div>
         </div>
@@ -242,7 +317,10 @@ export const BookingFlowPage = () => {
           <div style={styles.successIcon}><CheckCircle2 size={64} color="var(--success-color)" /></div>
           <h3 style={{ ...styles.stepTitle, marginBottom: '12px' }}>Booking Confirmed!</h3>
           <p style={styles.successText}>
-            Your appointment with Dr. {doctor?.user?.name} has been successfully scheduled and paid for.
+            Your appointment with Dr. {doctor?.user?.name} has been scheduled.
+          </p>
+          <p style={{ ...styles.successText, fontSize: '14px', color: '#64748b' }}>
+            Payment is pending verification. Your appointment will be confirmed once we validate your transfer.
           </p>
           <button style={styles.finishBtn} onClick={() => navigate('/patient/appointments')}>
             View My Appointments
@@ -270,11 +348,15 @@ export const BookingFlowPage = () => {
             </button>
           ) : (
             <button
-              style={styles.confirmBtn}
+              style={{
+                ...styles.confirmBtn,
+                opacity: paymentConfirmed ? 1 : 0.6,
+                cursor: paymentConfirmed ? 'pointer' : 'not-allowed'
+              }}
               onClick={handleBooking}
-              disabled={loading}
+              disabled={loading || !paymentConfirmed}
             >
-              {loading ? 'Processing...' : `Pay & Book Now`}
+              {loading ? 'Processing...' : `Confirm Payment & Book`}
             </button>
           )}
         </div>
@@ -498,6 +580,34 @@ const styles = {
     fontWeight: '700',
     cursor: 'pointer',
     transition: 'transform 0.2s ease',
+  },
+  bankSection: {
+    marginTop: '20px',
+  },
+  bankDetailRow: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingBottom: '14px',
+    marginBottom: '14px',
+    borderBottom: '1px solid #e5e7eb',
+    fontSize: '14px',
+  },
+  bankLabel: {
+    fontWeight: '600',
+    color: 'var(--text-color)',
+  },
+  copyBtn: {
+    background: 'transparent',
+    border: '1px solid #e5e7eb',
+    padding: '4px 8px',
+    borderRadius: '6px',
+    cursor: 'pointer',
+    color: 'var(--text-light)',
+    display: 'flex',
+    alignItems: 'center',
+    fontSize: '12px',
+    transition: 'all 0.2s ease',
   },
 };
 
