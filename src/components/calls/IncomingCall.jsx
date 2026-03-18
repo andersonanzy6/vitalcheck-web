@@ -140,40 +140,86 @@ export const IncomingCall = ({ currentUserId }) => {
   }
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-2xl shadow-xl p-6 max-w-sm w-full mx-4">
-        <div className="flex flex-col items-center gap-4">
-          {/* Call type icon */}
-          <div className="bg-blue-100 p-4 rounded-full">
-            {incomingCall.callType === 'video' ? (
-              <Video size={32} className="text-blue-500" />
-            ) : (
-              <Phone size={32} className="text-blue-500" />
-            )}
-          </div>
+    <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 animate-fade-in">
+      <style>{`
+        @keyframes pulse-ring {
+          0% {
+            transform: scale(1);
+            opacity: 1;
+          }
+          100% {
+            transform: scale(1.3);
+            opacity: 0;
+          }
+        }
+        @keyframes slide-up {
+          from {
+            transform: translateY(50px);
+            opacity: 0;
+          }
+          to {
+            transform: translateY(0);
+            opacity: 1;
+          }
+        }
+        .pulse-ring {
+          animation: pulse-ring 2s infinite;
+        }
+        .slide-up {
+          animation: slide-up 0.5s ease-out;
+        }
+      `}</style>
+      
+      <div className="w-full max-w-sm mx-4 slide-up">
+        <div className="bg-gradient-to-b from-blue-600 to-blue-800 rounded-3xl shadow-2xl p-8 text-white relative overflow-hidden">
+          {/* Background decoration */}
+          <div className="absolute top-0 left-0 w-96 h-96 bg-blue-400 rounded-full -top-40 -left-40 opacity-10"></div>
+          <div className="absolute bottom-0 right-0 w-96 h-96 bg-blue-400 rounded-full -bottom-40 -right-40 opacity-10"></div>
+          
+          <div className="relative z-10 flex flex-col items-center gap-6">
+            {/* Avatar and pulse animation */}
+            <div className="relative">
+              <div className="absolute inset-0 bg-white rounded-full opacity-20 pulse-ring"></div>
+              <div className="w-28 h-28 bg-gradient-to-br from-blue-300 to-blue-600 rounded-full flex items-center justify-center shadow-lg">
+                <span className="text-5xl font-bold">
+                  {incomingCall.callerName?.charAt(0).toUpperCase() || '?'}
+                </span>
+              </div>
+            </div>
 
-          {/* Caller info */}
-          <div className="text-center">
-            <p className="text-gray-600 text-sm">Incoming {incomingCall.callType} call</p>
-            <p className="text-2xl font-semibold text-gray-900">{incomingCall.callerName}</p>
-          </div>
+            {/* Caller info */}
+            <div className="text-center">
+              <p className="text-blue-100 text-sm font-medium mb-1">Incoming {incomingCall.callType} call</p>
+              <p className="text-4xl font-bold mb-2">{incomingCall.callerName}</p>
+              <p className="text-blue-100 text-sm">Ringing...</p>
+            </div>
 
-          {/* Action buttons */}
-          <div className="flex gap-3 w-full mt-6">
-            <button
-              onClick={handleDeclineCall}
-              className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
-            >
-              <PhoneOff size={20} />
-              Decline
-            </button>
-            <button
-              onClick={handleAcceptCall}
-              className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors"
-            >
-              <Phone size={20} />
-              Accept
-            </button>
+            {/* Call icon */}
+            <div className="mt-2">
+              {incomingCall.callType === 'video' ? (
+                <Video size={40} className="text-blue-100" />
+              ) : (
+                <Phone size={40} className="text-blue-100" />
+              )}
+            </div>
+
+            {/* Action buttons */}
+            <div className="w-full flex gap-4 mt-8 pt-6 border-t border-white/20">
+              <button
+                onClick={handleDeclineCall}
+                className="flex-1 flex items-center justify-center gap-2 px-4 py-4 bg-red-500 hover:bg-red-600 text-white rounded-full font-semibold transition-all transform hover:scale-105 active:scale-95 shadow-lg"
+              >
+                <PhoneOff size={24} />
+                <span>Decline</span>
+              </button>
+              <button
+                onClick={handleAcceptCall}
+                className="flex-1 flex items-center justify-center gap-2 px-4 py-4 bg-green-500 hover:bg-green-600 text-white rounded-full font-semibold transition-all transform hover:scale-105 active:scale-95 shadow-lg"
+              >
+                <Phone size={24} />
+                <span>Accept</span>
+              </button>
+            </div>
           </div>
         </div>
       </div>
