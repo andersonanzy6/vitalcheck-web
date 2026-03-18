@@ -32,8 +32,13 @@ export const ChatScreen = () => {
     }
 
     return () => {
+      // DON't disconnect socket - keep it alive across route changes
+      // Just cleanup event listeners
       if (socketRef.current) {
-        socketRef.current.disconnect();
+        socketRef.current.off('message-received');
+        socketRef.current.off('message-sent');
+        socketRef.current.off('user_online');
+        socketRef.current.off('user_offline');
       }
     };
   }, [conversationId, user?._id]);
@@ -119,12 +124,31 @@ export const ChatScreen = () => {
       window.socketRef = socketRef.current;
 
       socketRef.current.on('connect', () => {
-        console.log('Socket connected');
+        console.log('[Chat] Socket connected:', socketRef.current.id);
         socketRef.current.emit('join_conversation', conversationId);
       });
 
-      socketRef.current.on('message_received', (message) => {
-        setMessages(prev => [...prev, message]);
+      // CRITICAL FIX: Listen for correct event name from server
+      socketRef.current.on('message-received', (message) => {
+        console.log('[Chat] Message received via socket:', message);
+        setMessages(prev => {
+          // Avoid duplicates
+          if (prev.find(m => m._id === message._id)) {
+            return prev;
+          }
+          return [...prev, message];
+        });
+      });
+
+      // Also listen for message-sent confirmation
+      socketRef.current.on('message-sent', (message) => {
+        console.log('[Chat] Message-sent confirmation:', message);
+        setMessages(prev => {
+          if (prev.find(m => m._id === message._id)) {
+            return prev;
+          }
+          return [...prev, message];
+        });
       });
 
       // Listen for user online status
@@ -160,21 +184,31 @@ export const ChatScreen = () => {
     setNewMessage('');
 
     try {
-      // Send message via API
-      const response = await chatAPI.sendMessage(doctorId, messageText);
-
-      const sentMessage = response.data;
-      setMessages(prev => [...prev, sentMessage]);
-
-      // Emit via socket
-      if (socketRef.current) {
-        socketRef.current.emit('send_message', {
-          conversationId: doctorId,
-          message: sentMessage,
+      console.log('[Chat] Sending message to', doctorId);
+      
+      // Emit via socket first (real-time delivery)
+      if (socketRef.current?.connected) {
+        socketRef.current.emit('send-message', {
+          receiverId: doctorId,
+          message: messageText,
+          appointmentId: null,
+          messageType: 'text',
         });
+        console.log('[Chat] Message emitted via socket');
+      } else {
+        console.warn('[Chat] Socket not connected, falling back to API only');
+      }
+
+      // Also send via API to ensure persistence
+      try {
+        const response = await chatAPI.sendMessage(doctorId, messageText);
+        const sentMessage = response.data;
+        console.log('[Chat] Message persisted via API:', sentMessage);
+      } catch (apiErr) {
+        console.error('[Chat] API send failed:', apiErr);
       }
     } catch (err) {
-      console.error('Error sending message:', err);
+      console.error('[Chat] Error sending message:', err);
       setError('Failed to send message');
     }
   };

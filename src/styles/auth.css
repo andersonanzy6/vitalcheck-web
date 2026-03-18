@@ -1,10 +1,14 @@
 .auth-container {
   display: flex;
   justify-content: center;
-  align-items: center;
+  align-items: flex-start;
   min-height: 100vh;
   background: var(--light-gray);
   padding: 24px;
+  overflow-y: auto;
+  align-content: flex-start;
+  padding-top: 40px;
+  padding-bottom: 40px;
 }
 
 .auth-card {
