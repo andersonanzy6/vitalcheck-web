@@ -12,8 +12,10 @@ export const AuthProvider = ({ children }) => {
   // Initialize Socket.IO when authenticated
   useEffect(() => {
     if (token && user) {
+      console.log('[Auth] User logged in, initializing socket...');
       initializeSocket()
     } else if (window.socketRef?.connected) {
+      console.log('[Auth] User logged out, disconnecting socket...');
       window.socketRef?.disconnect()
       window.socketRef = null
     }
@@ -23,12 +25,20 @@ export const AuthProvider = ({ children }) => {
     try {
       // Don't reinitialize if already connected
       if (window.socketRef?.connected) {
-        console.log('[Auth] Socket.IO already connected');
+        console.log('[Auth] Socket.IO already connected:', window.socketRef.id);
         return;
       }
 
+      // Close existing socket if it exists but is disconnected
+      if (window.socketRef) {
+        console.log('[Auth] Cleaning up old socket instance');
+        window.socketRef.disconnect();
+        window.socketRef = null;
+      }
+
       const socketUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
-      console.log('[Auth] Initializing Socket.IO at:', socketUrl);
+      console.log('[Auth] Socket.IO connecting to:', socketUrl);
+      console.log('[Auth] Token present:', !!token);
       
       window.socketRef = io(socketUrl, {
         auth: {
@@ -37,23 +47,27 @@ export const AuthProvider = ({ children }) => {
         reconnection: true,
         reconnectionDelay: 1000,
         reconnectionDelayMax: 5000,
-        reconnectionAttempts: 5,
+        reconnectionAttempts: 10,
         transports: ['websocket', 'polling'],
       });
 
       window.socketRef.on('connect', () => {
-        console.log('[Auth] ✅ Socket.IO connected globally:', window.socketRef.id);
+        console.log('[Auth] ✅ Socket.IO CONNECTED:', window.socketRef.id);
       });
 
       window.socketRef.on('connect_error', (error) => {
-        console.error('[Auth] Socket connection error:', error.message);
+        console.error('[Auth] ❌ Socket connection error:', error.message || error);
       });
 
       window.socketRef.on('disconnect', (reason) => {
-        console.warn('[Auth] Socket disconnected:', reason);
+        console.warn('[Auth] ⚠️ Socket disconnected:', reason);
+      });
+
+      window.socketRef.on('auth-error', (data) => {
+        console.error('[Auth] ❌ Socket auth error:', data);
       });
     } catch (err) {
-      console.error('[Auth] Error initializing socket:', err);
+      console.error('[Auth] ❌ Exception initializing socket:', err);
     }
   }
 
