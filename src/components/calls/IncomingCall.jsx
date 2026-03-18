@@ -6,7 +6,7 @@ import axios from 'axios'
 
 // Helper function to construct API URLs properly
 const getAPIUrl = (endpoint) => {
-  const baseURL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api'
+  const baseURL = import.meta.env.VITE_API_BASE_URL || 'https://vitalcheck-56uj.onrender.com/api'
   // Remove trailing slash from baseURL if present
   const cleanBase = baseURL.endsWith('/') ? baseURL.slice(0, -1) : baseURL
   // Ensure endpoint starts with /
