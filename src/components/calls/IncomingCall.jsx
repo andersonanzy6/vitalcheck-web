@@ -6,7 +6,7 @@ import axios from 'axios'
 
 // Helper function to construct API URLs properly
 const getAPIUrl = (endpoint) => {
-  const baseURL = import.meta.env.VITE_API_URL || 'https://vitalcheck-56uj.onrender.com'
+  const baseURL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api'
   // Remove trailing slash from baseURL if present
   const cleanBase = baseURL.endsWith('/') ? baseURL.slice(0, -1) : baseURL
   // Ensure endpoint starts with /
@@ -61,7 +61,7 @@ export const IncomingCall = ({ currentUserId }) => {
 
       // Get auth token for joining room
       const response = await axios.post(
-        getAPIUrl('/api/call/join-room'),
+        getAPIUrl('/call/join-room'),
         { roomId: incomingCall.roomId },
         { headers: { Authorization: `Bearer ${localStorage.getItem('authToken')}` } }
       )

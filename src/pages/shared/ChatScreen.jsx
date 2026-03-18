@@ -114,10 +114,17 @@ export const ChatScreen = () => {
   const initializeSocket = () => {
     try {
       const token = localStorage.getItem('authToken');
-      socketRef.current = io(import.meta.env.VITE_API_URL || 'http://localhost:5000', {
+      const socketUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+      console.log('[Chat] Connecting to Socket.IO at:', socketUrl);
+      
+      socketRef.current = io(socketUrl, {
         auth: {
           token: token,
         },
+        reconnection: true,
+        reconnectionDelay: 1000,
+        reconnectionDelayMax: 5000,
+        reconnectionAttempts: 5,
       });
 
       // Store socket globally for call components to access

@@ -6,7 +6,7 @@ import axios from 'axios'
 
 // Helper function to construct API URLs properly
 const getAPIUrl = (endpoint) => {
-  const baseURL = import.meta.env.VITE_API_URL || 'https://vitalcheck-56uj.onrender.com'
+  const baseURL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api'
   // Remove trailing slash from baseURL if present
   const cleanBase = baseURL.endsWith('/') ? baseURL.slice(0, -1) : baseURL
   // Ensure endpoint starts with /
@@ -30,7 +30,7 @@ export const CallManager = ({ currentUserId, targetUserId, targetUserName }) => 
         try {
           // Get token for already-created room
           const response = await axios.post(
-            getAPIUrl('/api/call/join-room'),
+            getAPIUrl('/call/join-room'),
             { roomId: callingState.roomId },
             { headers: { Authorization: `Bearer ${localStorage.getItem('authToken')}` } }
           )
@@ -79,7 +79,7 @@ export const CallManager = ({ currentUserId, targetUserId, targetUserName }) => 
     try {
       // Create room via API
       const response = await axios.post(
-        getAPIUrl('/api/call/create-room'),
+        getAPIUrl('/call/create-room'),
         {},
         { headers: { Authorization: `Bearer ${localStorage.getItem('authToken')}` } }
       )
@@ -91,8 +91,8 @@ export const CallManager = ({ currentUserId, targetUserId, targetUserName }) => 
 
       // Emit socket event to notify target user with call invitation
       if (socketRef) {
-        socketRef.emit('incoming-call', {
-          from: currentUserId,
+        console.log('[Call] Emitting call-user to:', targetUserId);
+        socketRef.emit('call-user', {
           targetUserId,
           roomId,
           callType,
