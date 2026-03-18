@@ -1,4 +1,5 @@
 import React, { createContext, useState, useEffect, useCallback } from 'react'
+import { io } from 'socket.io-client'
 
 export const AuthContext = createContext()
 
@@ -7,6 +8,54 @@ export const AuthProvider = ({ children }) => {
   const [token, setToken] = useState(null)
   const [loading, setLoading] = useState(true)
   const [isLoggedIn, setIsLoggedIn] = useState(false)
+
+  // Initialize Socket.IO when authenticated
+  useEffect(() => {
+    if (token && user) {
+      initializeSocket()
+    } else if (window.socketRef?.connected) {
+      window.socketRef?.disconnect()
+      window.socketRef = null
+    }
+  }, [token, user])
+
+  const initializeSocket = () => {
+    try {
+      // Don't reinitialize if already connected
+      if (window.socketRef?.connected) {
+        console.log('[Auth] Socket.IO already connected');
+        return;
+      }
+
+      const socketUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+      console.log('[Auth] Initializing Socket.IO at:', socketUrl);
+      
+      window.socketRef = io(socketUrl, {
+        auth: {
+          token: token,
+        },
+        reconnection: true,
+        reconnectionDelay: 1000,
+        reconnectionDelayMax: 5000,
+        reconnectionAttempts: 5,
+        transports: ['websocket', 'polling'],
+      });
+
+      window.socketRef.on('connect', () => {
+        console.log('[Auth] ✅ Socket.IO connected globally:', window.socketRef.id);
+      });
+
+      window.socketRef.on('connect_error', (error) => {
+        console.error('[Auth] Socket connection error:', error.message);
+      });
+
+      window.socketRef.on('disconnect', (reason) => {
+        console.warn('[Auth] Socket disconnected:', reason);
+      });
+    } catch (err) {
+      console.error('[Auth] Error initializing socket:', err);
+    }
+  }
 
   // Check if user is already logged in on app start
   useEffect(() => {

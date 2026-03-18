@@ -20,12 +20,24 @@ export const MessagesPage = () => {
     try {
       setLoading(true);
       setError(null);
-      const response = await chatAPI.getConversations();
-      const convData = Array.isArray(response.data) ? response.data : response.data?.conversations || [];
+      
+      // Add timeout
+      const timeoutPromise = new Promise((_, reject) =>
+        setTimeout(() => reject(new Error('Request timeout')), 10000)
+      );
+      
+      const response = await Promise.race([
+        chatAPI.getConversations(),
+        timeoutPromise
+      ]);
+      
+      const convData = Array.isArray(response?.data) ? response.data : response?.data?.conversations || [];
       setConversations(convData);
+      setError(null);
     } catch (err) {
       console.error('Error fetching conversations:', err);
-      setError('Failed to load conversations');
+      setError('Failed to load conversations: ' + err.message);
+      setConversations([]);
     } finally {
       setLoading(false);
     }

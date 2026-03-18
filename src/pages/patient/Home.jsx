@@ -37,8 +37,18 @@ export const PatientHome = () => {
     try {
       setLoading(true);
       setError(null);
-      const response = await patientAPI.getAppointments();
-      const allAppointments = response.data || [];
+      
+      // Add timeout
+      const timeoutPromise = new Promise((_, reject) =>
+        setTimeout(() => reject(new Error('Request timeout')), 10000)
+      );
+      
+      const response = await Promise.race([
+        patientAPI.getAppointments(),
+        timeoutPromise
+      ]);
+      
+      const allAppointments = response?.data || [];
 
       // Calculate stats
       const upcoming = allAppointments.filter(
@@ -52,9 +62,11 @@ export const PatientHome = () => {
         upcomingAppointments: upcoming.length,
         completedAppointments: completed.length,
       });
+      setError(null);
     } catch (err) {
       console.error('Error fetching appointments:', err);
-      setError('Failed to load appointments');
+      setError('Failed to load appointments: ' + err.message);
+      setAppointments([]);
     } finally {
       setLoading(false);
     }

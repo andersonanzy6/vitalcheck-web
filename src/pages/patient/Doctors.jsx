@@ -33,12 +33,24 @@ export const DoctorsPage = () => {
     try {
       setLoading(true);
       setError(null);
-      const response = await patientAPI.getDoctors();
-      const doctorsData = Array.isArray(response.data) ? response.data : response.data?.doctors || [];
+      
+      // Add timeout
+      const timeoutPromise = new Promise((_, reject) =>
+        setTimeout(() => reject(new Error('Request timeout')), 10000)
+      );
+      
+      const response = await Promise.race([
+        patientAPI.getDoctors(),
+        timeoutPromise
+      ]);
+      
+      const doctorsData = Array.isArray(response?.data) ? response.data : response?.data?.doctors || [];
       setDoctors(doctorsData);
+      setError(null);
     } catch (err) {
       console.error('Error fetching doctors:', err);
-      setError('Failed to load doctors');
+      setError('Failed to load doctors: ' + err.message);
+      setDoctors([]);
     } finally {
       setLoading(false);
     }

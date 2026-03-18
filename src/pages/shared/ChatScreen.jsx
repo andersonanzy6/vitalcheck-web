@@ -4,7 +4,6 @@ import { useAuth } from '../../context/AuthContext.jsx';
 import { chatAPI, patientAPI } from '../../services/apiClient';
 import CallManager from '../../components/calls/CallManager';
 import IncomingCall from '../../components/calls/IncomingCall';
-import io from 'socket.io-client';
 
 export const ChatScreen = () => {
   const { doctorId } = useParams();
@@ -28,7 +27,16 @@ export const ChatScreen = () => {
 
   useEffect(() => {
     if (conversationId && user?._id) {
-      initializeSocket();
+      // Socket is already initialized globally by AuthProvider
+      // Just setup listeners for this conversation
+      const socket = window.socketRef;
+      socketRef.current = socket;
+      
+      if (socket?.connected) {
+        console.log('[Chat] Using existing Socket.IO connection:', socket.id);
+      } else {
+        console.log('[Chat] Waiting for Socket.IO to connect...');
+      }
     }
 
     return () => {
@@ -111,78 +119,59 @@ export const ChatScreen = () => {
     }
   };
 
-  const initializeSocket = () => {
-    try {
-      const token = localStorage.getItem('authToken');
-      const socketUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
-      console.log('[Chat] Connecting to Socket.IO at:', socketUrl);
-      
-      socketRef.current = io(socketUrl, {
-        auth: {
-          token: token,
-        },
-        reconnection: true,
-        reconnectionDelay: 1000,
-        reconnectionDelayMax: 5000,
-        reconnectionAttempts: 5,
-      });
+  // Socket listeners - setup when socket becomes available
+  useEffect(() => {
+    const socket = window.socketRef;
+    if (!socket) return;
 
-      // Store socket globally for call components to access
-      window.socketRef = socketRef.current;
-
-      socketRef.current.on('connect', () => {
-        console.log('[Chat] Socket connected:', socketRef.current.id);
-        socketRef.current.emit('join_conversation', conversationId);
-      });
-
-      // CRITICAL FIX: Listen for correct event name from server
-      socketRef.current.on('message-received', (message) => {
-        console.log('[Chat] Message received via socket:', message);
-        setMessages(prev => {
-          // Avoid duplicates
-          if (prev.find(m => m._id === message._id)) {
-            return prev;
-          }
-          return [...prev, message];
-        });
-      });
-
-      // Also listen for message-sent confirmation
-      socketRef.current.on('message-sent', (message) => {
-        console.log('[Chat] Message-sent confirmation:', message);
-        setMessages(prev => {
-          if (prev.find(m => m._id === message._id)) {
-            return prev;
-          }
-          return [...prev, message];
-        });
-      });
-
-      // Listen for user online status
-      socketRef.current.on('user_online', (data) => {
-        if (data.userId === doctorId) {
-          console.log('User is online:', data.userId);
-          setIsOnline(true);
-          setLastSeen(null);
+    const handleMessageReceived = (message) => {
+      console.log('[Chat] Message received via socket:', message);
+      setMessages(prev => {
+        if (prev.find(m => m._id === message._id)) {
+          return prev;
         }
+        return [...prev, message];
       });
+    };
 
-      // Listen for user offline status
-      socketRef.current.on('user_offline', (data) => {
-        if (data.userId === doctorId) {
-          console.log('User is offline:', data.userId);
-          setIsOnline(false);
-          setLastSeen(new Date());
+    const handleMessageSent = (message) => {
+      console.log('[Chat] Message-sent confirmation:', message);
+      setMessages(prev => {
+        if (prev.find(m => m._id === message._id)) {
+          return prev;
         }
+        return [...prev, message];
       });
+    };
 
-      socketRef.current.on('error', (err) => {
-        console.error('Socket error:', err);
-      });
-    } catch (err) {
-      console.error('Error initializing socket:', err);
-    }
-  };
+    const handleUserOnline = (data) => {
+      if (data.userId === doctorId) {
+        console.log('User is online:', data.userId);
+        setIsOnline(true);
+        setLastSeen(null);
+      }
+    };
+
+    const handleUserOffline = (data) => {
+      if (data.userId === doctorId) {
+        console.log('User is offline:', data.userId);
+        setIsOnline(false);
+        setLastSeen(new Date());
+      }
+    };
+
+    socket.on('message-received', handleMessageReceived);
+    socket.on('message-sent', handleMessageSent);
+    socket.on('user_online', handleUserOnline);
+    socket.on('user_offline', handleUserOffline);
+
+    return () => {
+      socket.off('message-received', handleMessageReceived);
+      socket.off('message-sent', handleMessageSent);
+      socket.off('user_online', handleUserOnline);
+      socket.off('user_offline', handleUserOffline);
+    };
+  }, [doctorId]);
 
   const handleSendMessage = async () => {
     if (!newMessage.trim()) return;
