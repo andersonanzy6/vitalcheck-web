@@ -36,7 +36,11 @@ export const AuthProvider = ({ children }) => {
         window.socketRef = null;
       }
 
-      const socketUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+      // CRITICAL: Use correct production URL for Socket.IO
+      // Must be the base URL without /api suffix
+      const socketUrl = import.meta.env.VITE_API_URL 
+        || 'https://vitalcheck-56uj.onrender.com';
+      
       console.log('[Auth] Socket.IO connecting to:', socketUrl);
       console.log('[Auth] Token present:', !!token);
       
