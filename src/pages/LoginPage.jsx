@@ -44,6 +44,21 @@ const LoginPage = () => {
         <h1 className="auth-title">VitalCheck</h1>
         <p className="auth-subtitle">Professional Health Consultation</p>
 
+        <button
+          type="button"
+          className="auth-button auth-guest-button"
+          onClick={() => window.location.href = '/symptom-checker'}
+          style={{
+            backgroundColor: '#2563eb',
+            borderColor: '#1d4ed8',
+            color: 'white',
+            fontWeight: '700',
+            marginBottom: '12px',
+          }}
+        >
+          Continue as guest with Symptom Checker
+        </button>
+
         <form onSubmit={handleSubmit} className="auth-form">
           <div className="form-group">
             <label htmlFor="email">Email</label>
@@ -92,6 +107,10 @@ const LoginPage = () => {
             {loading ? 'Logging in...' : 'Login'}
           </button>
         </form>
+
+        <p className="auth-link">
+          <a href="/forgot-password">Forgot Password?</a>
+        </p>
 
         <p className="auth-link">
           Don't have an account? <a href="/register">Register here</a>

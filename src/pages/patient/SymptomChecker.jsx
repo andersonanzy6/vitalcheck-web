@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
+import { useAuth } from '../../context/AuthContext.jsx'
 import {
     Stethoscope,
     Send,
@@ -16,6 +17,7 @@ import { aiAPI } from '../../services/apiClient'
 
 export const SymptomChecker = () => {
     const navigate = useNavigate()
+    const { isLoggedIn } = useAuth()
     const [messages, setMessages] = useState([
         {
             sender: 'ai',
@@ -83,6 +85,14 @@ export const SymptomChecker = () => {
         return new Date(date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
     }
 
+    const handleDoctorNavigation = () => {
+        if (isLoggedIn) {
+            navigate('/patient/doctors')
+        } else {
+            navigate('/login', { state: { from: '/symptom-checker' } })
+        }
+    }
+
     return (
         <div style={styles.container}>
             {/* Chat Header */}
@@ -96,6 +106,11 @@ export const SymptomChecker = () => {
                         <Sparkles size={12} style={{ marginRight: '4px' }} />
                         Always Active
                     </p>
+                    {!isLoggedIn && (
+                      <div style={styles.guestNotice}>
+                        You can use symptom chat without registering. Doctor booking/chat requires login or registration.
+                      </div>
+                    )}
                 </div>
                 {result && (
                     <button
@@ -186,16 +201,16 @@ export const SymptomChecker = () => {
                             <p style={{ fontSize: '13px', marginBottom: '12px' }}>We recommend booking a consultation with a physician for a proper diagnosis.</p>
                             <button
                                 style={styles.primaryButton}
-                                onClick={() => navigate('/patient/doctors')}
+                                onClick={handleDoctorNavigation}
                             >
-                                Book a Doctor <ArrowRight size={16} style={{ marginLeft: '8px' }} />
+                                {isLoggedIn ? 'Book a Doctor' : 'Login to Book'} <ArrowRight size={16} style={{ marginLeft: '8px' }} />
                             </button>
                         </div>
                     )}
 
                     <button
                         style={styles.consultPhysicianButton}
-                        onClick={() => navigate('/patient/doctors')}
+                        onClick={handleDoctorNavigation}
                         onMouseEnter={(e) => e.target.style.transform = 'translateY(-2px)'}
                         onMouseLeave={(e) => e.target.style.transform = 'translateY(0)'}
                     >
@@ -483,6 +498,17 @@ const styles = {
         textAlign: 'center',
         marginTop: '16px',
         fontStyle: 'italic',
+    },
+    guestNotice: {
+        marginTop: '8px',
+        padding: '10px',
+        borderRadius: '10px',
+        backgroundColor: '#e0f2fe',
+        color: '#1e3a8a',
+        fontSize: '13px',
+        border: '1px solid #93c5fd',
+        maxWidth: '100%',
+        lineHeight: '1.4',
     }
 }
 

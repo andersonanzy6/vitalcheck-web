@@ -32,6 +32,8 @@ import { DoctorDetailPage } from './pages/shared/DoctorDetail'
 import { BookingFlowPage } from './pages/shared/BookingFlow'
 import { MedicalRecordsPage } from './pages/shared/MedicalRecords'
 import { AppointmentDetailPage } from './pages/shared/AppointmentDetail'
+import ForgotPasswordPage from './pages/ForgotPasswordPage'
+import ResetPasswordPage from './pages/ResetPasswordPage'
 
 function App() {
   return (
@@ -40,10 +42,18 @@ function App() {
         <HMSRoomProvider>
           <Router future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
           <Routes>
+            {/* Public Routes */}
+            <Route path="/" element={<Navigate to="/symptom-checker" replace />} />
+            <Route path="/symptom-checker" element={<SymptomChecker />} />
+
             {/* Auth Routes */}
-            <Route path="/" element={<Navigate to="/patient/home" replace />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/register" element={<RegisterPage />} />
+            <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+            <Route path="/reset-password" element={<ResetPasswordPage />} />
+
+            {/* Alias route to public symptom checker (prevents unauthorized /patient tree redirect loops) */}
+            <Route path="/patient/symptom-checker" element={<Navigate to="/symptom-checker" replace />} />
 
             {/* Patient Routes */}
             <Route
@@ -58,7 +68,6 @@ function App() {
                       <Route path="messages" element={<MessagesPage />} />
                       <Route path="notifications" element={<NotificationsPage />} />
                       <Route path="profile" element={<ProfilePage />} />
-                      <Route path="symptom-checker" element={<SymptomChecker />} />
                       <Route path="payments" element={<PaymentsPage />} />
                     </Routes>
                   </MainLayout>
@@ -145,7 +154,7 @@ function App() {
             />
 
             {/* Catch all */}
-            <Route path="*" element={<Navigate to="/login" replace />} />
+            <Route path="*" element={<Navigate to="/symptom-checker" replace />} />
           </Routes>
         </Router>
         </HMSRoomProvider>

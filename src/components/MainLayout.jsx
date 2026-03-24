@@ -48,7 +48,7 @@ const MainLayout = ({ children }) => {
   const patientTabs = [
     { label: 'Home', icon: <Home size={22} />, path: '/patient/home' },
     { label: 'Doctors', icon: <Stethoscope size={22} />, path: '/patient/doctors' },
-    { label: 'Symptom Checker', icon: <ClipboardList size={22} />, path: '/patient/symptom-checker' },
+    { label: 'Symptom Checker', icon: <ClipboardList size={22} />, path: '/symptom-checker' },
     { label: 'Appointments', icon: <Calendar size={22} />, path: '/patient/appointments' },
     { label: 'Messages', icon: <MessageSquare size={22} />, path: '/patient/messages' },
     { label: 'Notifications', icon: <Bell size={22} />, path: '/patient/notifications' },
