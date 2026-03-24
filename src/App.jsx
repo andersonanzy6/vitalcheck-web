@@ -42,15 +42,15 @@ function App() {
         <HMSRoomProvider>
           <Router future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
           <Routes>
-            {/* Public Routes */}
-            <Route path="/" element={<Navigate to="/symptom-checker" replace />} />
-            <Route path="/symptom-checker" element={<SymptomChecker />} />
-
-            {/* Auth Routes */}
+            {/* Auth Routes - Login first as landing page */}
+            <Route path="/" element={<Navigate to="/login" replace />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/register" element={<RegisterPage />} />
             <Route path="/forgot-password" element={<ForgotPasswordPage />} />
             <Route path="/reset-password" element={<ResetPasswordPage />} />
+
+            {/* Public Symptom Checker Route */}
+            <Route path="/symptom-checker" element={<SymptomChecker />} />
 
             {/* Alias route to public symptom checker (prevents unauthorized /patient tree redirect loops) */}
             <Route path="/patient/symptom-checker" element={<Navigate to="/symptom-checker" replace />} />
@@ -154,7 +154,7 @@ function App() {
             />
 
             {/* Catch all */}
-            <Route path="*" element={<Navigate to="/symptom-checker" replace />} />
+            <Route path="*" element={<Navigate to="/login" replace />} />
           </Routes>
         </Router>
         </HMSRoomProvider>

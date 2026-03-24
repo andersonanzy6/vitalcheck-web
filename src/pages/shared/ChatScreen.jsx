@@ -197,7 +197,7 @@ export const ChatScreen = () => {
       // Get the current socket (from global)
       const socket = window.socketRef;
       
-      // Emit via socket first (real-time delivery)
+      // Emit via socket (real-time delivery + persistence)
       if (socket?.connected) {
         socket.emit('send-message', {
           receiverId: doctorId,
@@ -207,16 +207,16 @@ export const ChatScreen = () => {
         });
         console.log('[Chat] Message emitted via socket');
       } else {
-        console.warn('[Chat] Socket not connected (status:', socket?.connected, '), falling back to API only');
-      }
-
-      // Also send via API to ensure persistence
-      try {
-        const response = await chatAPI.sendMessage(doctorId, messageText);
-        const sentMessage = response.data;
-        console.log('[Chat] Message persisted via API:', sentMessage);
-      } catch (apiErr) {
-        console.error('[Chat] API send failed:', apiErr);
+        console.warn('[Chat] Socket not connected, attempting API fallback');
+        // Fallback to API only if socket is unavailable
+        try {
+          const response = await chatAPI.sendMessage(doctorId, messageText);
+          const sentMessage = response.data;
+          console.log('[Chat] Message sent via API fallback:', sentMessage);
+        } catch (apiErr) {
+          console.error('[Chat] API fallback failed:', apiErr);
+          setError('Failed to send message');
+        }
       }
     } catch (err) {
       console.error('[Chat] Error sending message:', err);

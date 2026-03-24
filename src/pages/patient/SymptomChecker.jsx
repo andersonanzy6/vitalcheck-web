@@ -198,7 +198,7 @@ export const SymptomChecker = () => {
 
                     {result.suggestDoctor && (
                         <div style={styles.suggestionBox}>
-                            <p style={{ fontSize: '13px', marginBottom: '12px' }}>We recommend booking a consultation with a physician for a proper diagnosis.</p>
+                            <p style={{ fontSize: '13px', marginBottom: '12px' }}>We recommend booking a consultation with a physician for a proper diagnosis. Or visit the nearest hospital for immediate care.</p>
                             <button
                                 style={styles.primaryButton}
                                 onClick={handleDoctorNavigation}
