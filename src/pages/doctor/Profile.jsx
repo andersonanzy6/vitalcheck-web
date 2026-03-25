@@ -31,6 +31,7 @@ export const DoctorProfilePage = () => {
   const [coverImage, setCoverImage] = useState(null);
   const [profilePreview, setProfilePreview] = useState(user?.profileImage || null);
   const [coverPreview, setCoverPreview] = useState(user?.coverImage || null);
+  const [profileLoaded, setProfileLoaded] = useState(false);
   const [formData, setFormData] = useState({
     name: user?.name || '',
     email: user?.email || '',
@@ -43,37 +44,50 @@ export const DoctorProfilePage = () => {
     consultationFee: '',
   });
 
+  // Fetch complete profile data once when user becomes available
   useEffect(() => {
-    fetchDoctorProfile();
-  }, []);
+    if (!user || profileLoaded) return;
 
-  const fetchDoctorProfile = async () => {
-    try {
-      const res = await doctorAPI.updateDoctorProfileFields({});
-    } catch {
-      // Try GET by fetching from /doctors endpoint via profile
-    }
-    // Fetch the doctor's own profile
-    try {
-      const res = await doctorAPI.getProfile();
-      const profile = res.data?.doctorProfile || res.data;
-      if (profile) {
-        setDoctorProfile(profile);
-        setFormData(prev => ({
-          ...prev,
-          phone: profile.phone || '',
-          specialization: profile.specialization || '',
-          yearsOfExperience: profile.experience || '',
-          bio: profile.bio || '',
-          licenseNumber: profile.licenseNumber || '',
-          clinicAddress: profile.clinicAddress || '',
-          consultationFee: profile.consultationFee || '',
-        }));
+    const fetchDoctorProfile = async () => {
+      try {
+        // First try to get the complete user profile
+        const userRes = await doctorAPI.getProfile();
+        const userProfileData = userRes.data;
+
+        // Update the user in context with complete data
+        updateUser({ ...user, ...userProfileData });
+
+        // Then get doctor-specific profile
+        const doctorRes = await doctorAPI.updateDoctorProfileFields({});
+        const doctorProfileData = doctorRes.data;
+
+        setDoctorProfile(doctorProfileData);
+
+        // Update form data with complete profile
+        setFormData({
+          name: userProfileData.name || '',
+          email: userProfileData.email || '',
+          phone: userProfileData.phone || doctorProfileData.phone || '',
+          specialization: doctorProfileData.specialization || '',
+          yearsOfExperience: doctorProfileData.experience || '',
+          bio: doctorProfileData.bio || '',
+          licenseNumber: doctorProfileData.licenseNumber || '',
+          clinicAddress: doctorProfileData.clinicAddress || '',
+          consultationFee: doctorProfileData.consultationFee || '',
+        });
+
+        // Update image previews
+        setProfilePreview(userProfileData.profileImage || null);
+        setCoverPreview(userProfileData.coverImage || null);
+        setProfileLoaded(true);
+      } catch (err) {
+        console.error('Error fetching doctor profile:', err);
+        setError('Failed to load profile data');
       }
-    } catch (err) {
-      console.error('Error fetching doctor profile:', err);
-    }
-  };
+    };
+
+    fetchDoctorProfile();
+  }, [user?.id, profileLoaded, updateUser]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -137,7 +151,6 @@ export const DoctorProfilePage = () => {
       setSuccessMessage('Profile updated successfully');
       setIsEditing(false);
       setTimeout(() => setSuccessMessage(''), 3000);
-      fetchDoctorProfile();
     } catch (err) {
       console.error('Error updating profile:', err);
       setError(err.response?.data?.message || 'Failed to update profile');
