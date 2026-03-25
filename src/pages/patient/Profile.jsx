@@ -41,6 +41,44 @@ export const ProfilePage = () => {
     medicalHistory: user?.medicalHistory || '',
     bloodGroup: user?.bloodGroup || '',
   });
+  const [profileLoaded, setProfileLoaded] = useState(false);
+
+  // Fetch complete profile data once when user becomes available
+  useEffect(() => {
+    if (!user || profileLoaded) return;
+
+    const fetchProfile = async () => {
+      try {
+        const response = await patientAPI.getProfile();
+        const profileData = response.data;
+
+        // Update the user in context with complete data
+        updateUser({ ...user, ...profileData });
+
+        // Update form data with complete profile
+        setFormData({
+          name: profileData.name || '',
+          email: profileData.email || '',
+          phone: profileData.phone || '',
+          age: profileData.age || '',
+          gender: profileData.gender || '',
+          address: profileData.address || '',
+          medicalHistory: profileData.medicalHistory || '',
+          bloodGroup: profileData.bloodGroup || '',
+        });
+
+        // Update image previews
+        setProfilePreview(profileData.profileImage || null);
+        setCoverPreview(profileData.coverImage || null);
+        setProfileLoaded(true);
+      } catch (err) {
+        console.error('Error fetching profile:', err);
+        setError('Failed to load profile data');
+      }
+    };
+
+    fetchProfile();
+  }, [user?.id, profileLoaded, updateUser]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;

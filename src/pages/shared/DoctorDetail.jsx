@@ -126,7 +126,7 @@ export const DoctorDetailPage = () => {
           <div style={styles.infoIconWrapper}><CreditCard size={20} className="icon-blue" /></div>
           <div>
             <p style={styles.infoLabel}>Consultation Fee</p>
-            <p style={styles.infoValue}>{doctor.consultationFee ? `$${doctor.consultationFee}` : '$50 (Est.)'}</p>
+            <p style={styles.infoValue}>{doctor.consultationFee ? `₦${doctor.consultationFee}` : '₦3000 (Est.)'}</p>
           </div>
         </div>
 
@@ -138,13 +138,13 @@ export const DoctorDetailPage = () => {
           </div>
         </div>
 
-        <div style={styles.infoItem}>
+        {/* <div style={styles.infoItem}>
           <div style={styles.infoIconWrapper}><Phone size={20} className="icon-blue" /></div>
           <div>
             <p style={styles.infoLabel}>Contact</p>
             <p style={styles.infoValue}>{doctor.phone || 'Available via app'}</p>
           </div>
-        </div>
+        </div> */}
       </div>
 
       {/* About Section */}
@@ -169,10 +169,10 @@ export const DoctorDetailPage = () => {
       {doctor.licenseNumber && (
         <div style={styles.section}>
           <h3 style={styles.sectionTitle}>Qualifications</h3>
-          <div style={styles.qualificationItem}>
+          {/* <div style={styles.qualificationItem}>
             <p style={styles.qualificationLabel}>License Number</p>
             <p style={styles.qualificationValue}>{doctor.licenseNumber}</p>
-          </div>
+          </div> */}
           <div style={styles.qualificationItem}>
             <p style={styles.qualificationLabel}>Specialization</p>
             <p style={styles.qualificationValue}>{doctor.specialization}</p>

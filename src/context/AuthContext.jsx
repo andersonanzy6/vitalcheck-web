@@ -8,16 +8,20 @@ export const AuthProvider = ({ children }) => {
   const [token, setToken] = useState(null)
   const [loading, setLoading] = useState(true)
   const [isLoggedIn, setIsLoggedIn] = useState(false)
+  const socketInitializedRef = React.useRef(false)
 
   // Initialize Socket.IO when authenticated
   useEffect(() => {
-    if (token && user) {
+    if (token && user && !socketInitializedRef.current) {
       console.log('[Auth] User logged in, initializing socket...');
       initializeSocket()
-    } else if (window.socketRef?.connected) {
-      console.log('[Auth] User logged out, disconnecting socket...');
-      window.socketRef?.disconnect()
+    } else if (!token || !user) {
+      if (window.socketRef?.connected) {
+        console.log('[Auth] User logged out, disconnecting socket...');
+        window.socketRef.disconnect()
+      }
       window.socketRef = null
+      socketInitializedRef.current = false
     }
   }, [token, user])
 
@@ -56,9 +60,13 @@ export const AuthProvider = ({ children }) => {
       });
 
       window.socketRef.on('connect', () => {
+        socketInitializedRef.current = true
         console.log('[Auth] ✅ Socket.IO CONNECTED:', window.socketRef.id);
       });
-
+      window.socketRef.on('disconnect', (reason) => {
+        socketInitializedRef.current = false
+        console.warn('[Auth] ⚠️ Socket disconnected:', reason);
+      });
       window.socketRef.on('connect_error', (error) => {
         console.error('[Auth] ❌ Socket connection error:', error.message || error);
       });

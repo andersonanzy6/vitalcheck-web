@@ -41,7 +41,7 @@ const Sidebar = ({ userRole, onLogout }) => {
   return (
     <aside className="sidebar">
       <div className="sidebar-header">
-        <h2 className="sidebar-title">🏥 VitalCheck</h2>
+        <h2 className="sidebar-title"><i className="fas fa-heartbeat"></i> VitalCheck</h2>
       </div>
       <nav className="sidebar-nav">
         {menuItems.map(item => (

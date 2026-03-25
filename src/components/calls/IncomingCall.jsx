@@ -124,6 +124,129 @@ export const IncomingCall = ({ currentUserId }) => {
     setIncomingCall(null)
   }
 
+  const styles = {
+    overlay: {
+      position: 'fixed',
+      top: 0,
+      right: 0,
+      bottom: 0,
+      left: 0,
+      backgroundColor: 'rgba(0, 0, 0, 0.7)',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      zIndex: 50,
+      overflow: 'hidden',
+    },
+    cardContainer: {
+      width: '100%',
+      maxWidth: '420px',
+      margin: '0 1rem',
+    },
+    card: {
+      background: 'linear-gradient(180deg, #2563eb, #1e40af)',
+      borderRadius: '1.5rem',
+      boxShadow: '0 25px 50px rgba(0, 0, 0, 0.25)',
+      padding: '2rem',
+      color: '#ffffff',
+      position: 'relative',
+      overflow: 'hidden',
+    },
+    decorationCircle: {
+      position: 'absolute',
+      width: '384px',
+      height: '384px',
+      borderRadius: '9999px',
+      backgroundColor: '#60a5fa',
+      opacity: 0.1,
+    },
+    content: {
+      position: 'relative',
+      zIndex: 10,
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center',
+      gap: '1.5rem',
+    },
+    avatarWrapper: {
+      position: 'relative',
+      width: '112px',
+      height: '112px',
+    },
+    pulseRing: {
+      position: 'absolute',
+      inset: 0,
+      backgroundColor: '#ffffff',
+      borderRadius: '9999px',
+      opacity: 0.2,
+      animation: 'pulse-ring 2s infinite',
+    },
+    avatar: {
+      width: '112px',
+      height: '112px',
+      borderRadius: '9999px',
+      background: 'linear-gradient(135deg, #93c5fd, #1d4ed8)',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      boxShadow: '0 10px 30px rgba(0, 0, 0, 0.3)',
+      fontSize: '2.5rem',
+      fontWeight: 'bold',
+    },
+    callerInfo: {
+      textAlign: 'center',
+    },
+    callerText: {
+      margin: 0,
+    },
+    callIcon: {
+      marginTop: '0.5rem',
+    },
+    actions: {
+      width: '100%',
+      display: 'flex',
+      gap: '1rem',
+      marginTop: '2rem',
+      paddingTop: '1.5rem',
+      borderTop: '1px solid rgba(255, 255, 255, 0.2)',
+    },
+    button: {
+      flex: 1,
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: '0.5rem',
+      padding: '0.85rem',
+      color: '#fff',
+      border: 'none',
+      borderRadius: '9999px',
+      fontWeight: 600,
+      cursor: 'pointer',
+      boxShadow: '0 12px 20px rgba(0, 0, 0, 0.25)',
+      transition: 'transform 0.2s ease, background-color 0.2s ease',
+    },
+    decline: {
+      backgroundColor: '#ef4444',
+    },
+    accept: {
+      backgroundColor: '#22c55e',
+    },
+    icon: {
+      color: '#bfdbfe',
+    },
+    badge: {
+      margin: 0,
+      fontSize: '0.9rem',
+      color: '#bfdbfe',
+    },
+    title: {
+      margin: '0.25rem 0 0.5rem',
+      fontSize: '2rem',
+      fontWeight: 'bold',
+      color: '#ffffff',
+    },
+  }
+
   if (activeCall) {
     return (
       <ActiveCall
@@ -140,7 +263,7 @@ export const IncomingCall = ({ currentUserId }) => {
   }
 
   return (
-    <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 animate-fade-in">
+    <div style={styles.overlay}>
       <style>{`
         @keyframes pulse-ring {
           0% {
@@ -162,59 +285,55 @@ export const IncomingCall = ({ currentUserId }) => {
             opacity: 1;
           }
         }
-        .pulse-ring {
-          animation: pulse-ring 2s infinite;
-        }
-        .slide-up {
-          animation: slide-up 0.5s ease-out;
+        @keyframes fade-in {
+          from { opacity: 0; }
+          to { opacity: 1; }
         }
       `}</style>
-      
-      <div className="w-full max-w-sm mx-4 slide-up">
-        <div className="bg-gradient-to-b from-blue-600 to-blue-800 rounded-3xl shadow-2xl p-8 text-white relative overflow-hidden">
+
+      <div style={{ ...styles.cardContainer, animation: 'slide-up 0.5s ease-out' }}>
+        <div style={styles.card}>
           {/* Background decoration */}
-          <div className="absolute top-0 left-0 w-96 h-96 bg-blue-400 rounded-full -top-40 -left-40 opacity-10"></div>
-          <div className="absolute bottom-0 right-0 w-96 h-96 bg-blue-400 rounded-full -bottom-40 -right-40 opacity-10"></div>
-          
-          <div className="relative z-10 flex flex-col items-center gap-6">
+          <div style={{ ...styles.decorationCircle, top: '-160px', left: '-160px' }} />
+          <div style={{ ...styles.decorationCircle, bottom: '-160px', right: '-160px' }} />
+
+          <div style={styles.content}>
             {/* Avatar and pulse animation */}
-            <div className="relative">
-              <div className="absolute inset-0 bg-white rounded-full opacity-20 pulse-ring"></div>
-              <div className="w-28 h-28 bg-gradient-to-br from-blue-300 to-blue-600 rounded-full flex items-center justify-center shadow-lg">
-                <span className="text-5xl font-bold">
-                  {incomingCall.callerName?.charAt(0).toUpperCase() || '?'}
-                </span>
+            <div style={styles.avatarWrapper}>
+              <div style={styles.pulseRing} />
+              <div style={styles.avatar}>
+                {incomingCall.callerName?.charAt(0).toUpperCase() || '?'}
               </div>
             </div>
 
             {/* Caller info */}
-            <div className="text-center">
-              <p className="text-blue-100 text-sm font-medium mb-1">Incoming {incomingCall.callType} call</p>
-              <p className="text-4xl font-bold mb-2">{incomingCall.callerName}</p>
-              <p className="text-blue-100 text-sm">Ringing...</p>
+            <div style={styles.callerInfo}>
+              <p style={styles.badge}>Incoming {incomingCall.callType} call</p>
+              <p style={styles.title}>{incomingCall.callerName}</p>
+              <p style={styles.badge}>Ringing...</p>
             </div>
 
             {/* Call icon */}
-            <div className="mt-2">
+            <div style={styles.callIcon}>
               {incomingCall.callType === 'video' ? (
-                <Video size={40} className="text-blue-100" />
+                <Video size={40} style={styles.icon} />
               ) : (
-                <Phone size={40} className="text-blue-100" />
+                <Phone size={40} style={styles.icon} />
               )}
             </div>
 
             {/* Action buttons */}
-            <div className="w-full flex gap-4 mt-8 pt-6 border-t border-white/20">
+            <div style={styles.actions}>
               <button
                 onClick={handleDeclineCall}
-                className="flex-1 flex items-center justify-center gap-2 px-4 py-4 bg-red-500 hover:bg-red-600 text-white rounded-full font-semibold transition-all transform hover:scale-105 active:scale-95 shadow-lg"
+                style={{ ...styles.button, ...styles.decline }}
               >
                 <PhoneOff size={24} />
                 <span>Decline</span>
               </button>
               <button
                 onClick={handleAcceptCall}
-                className="flex-1 flex items-center justify-center gap-2 px-4 py-4 bg-green-500 hover:bg-green-600 text-white rounded-full font-semibold transition-all transform hover:scale-105 active:scale-95 shadow-lg"
+                style={{ ...styles.button, ...styles.accept }}
               >
                 <Phone size={24} />
                 <span>Accept</span>

@@ -31,17 +31,22 @@ const MainLayout = ({ children }) => {
   const isMobile = window.innerWidth <= 768
 
   React.useEffect(() => {
-    fetchUnreadCount()
-    const interval = setInterval(fetchUnreadCount, 30000) // Refresh every 30s
-    return () => clearInterval(interval)
-  }, [])
+    if (user) {
+      fetchUnreadCount()
+      const interval = setInterval(fetchUnreadCount, 30000) // Refresh every 30s
+      return () => clearInterval(interval)
+    }
+  }, [user])
 
   const fetchUnreadCount = async () => {
+    if (!user) return // Don't fetch if no user
+    
     try {
       const res = await notificationAPI.getUnreadCount()
       setUnreadCount(res.data.unreadCount || 0)
     } catch (err) {
       console.error('Error fetching unread count:', err)
+      // Don't show error to user, just log it
     }
   }
 
@@ -81,7 +86,7 @@ const MainLayout = ({ children }) => {
       <header className="mobile-header">
         <div className="header-content">
           <div className="header-left">
-            <h1 className="app-logo">🏥 VitalCheck</h1>
+            <h1 className="app-logo"><i className="fas fa-heartbeat"></i> VitalCheck</h1>
           </div>
           <div className="header-right">
             <button
@@ -134,7 +139,7 @@ const MainLayout = ({ children }) => {
         {!isMobile && (
           <aside className="sidebar">
             <div className="sidebar-header">
-              <h2 className="sidebar-logo">🏥 VitalCheck</h2>
+              <h2 className="sidebar-logo"><i className="fas fa-heartbeat"></i> VitalCheck</h2>
             </div>
             <nav className="sidebar-nav">
               {tabs.map((tab) => (
